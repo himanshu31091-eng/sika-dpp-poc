@@ -24,19 +24,21 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [docs, setDocs] = useState<DocItem[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
-  const [status, setStatus] = useState('draft');
-  const [docType, setDocType] = useState('TDS');
-  const [language, setLanguage] = useState('EN');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Use refs for text inputs to avoid re-render on every keystroke
-  const slugRef = useRef<HTMLInputElement>(null);
-  const productCodeRef = useRef<HTMLInputElement>(null);
-  const productNameRef = useRef<HTMLInputElement>(null);
-  const versionRef = useRef<HTMLInputElement>(null);
-  const categoryRef = useRef<HTMLInputElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const edmsRef = useRef<HTMLInputElement>(null);
+  // All form data in ONE ref — no re-renders when anything changes
+  const formRef = useRef({
+    slug: '',
+    productCode: '',
+    productName: '',
+    versionNumber: '1.0',
+    title: '',
+    language: 'EN',
+    documentType: 'TDS',
+    productCategory: '',
+    edmsDocId: '',
+    status: 'draft',
+  });
 
   const loadDocs = useCallback(async () => {
     setDocsLoading(true);
@@ -54,29 +56,18 @@ export default function AdminPage() {
     setResult(null);
     try {
       const fd = new FormData();
-      fd.append('slug', slugRef.current?.value || '');
-      fd.append('productCode', productCodeRef.current?.value || '');
-      fd.append('productName', productNameRef.current?.value || '');
-      fd.append('versionNumber', versionRef.current?.value || '1.0');
-      fd.append('productCategory', categoryRef.current?.value || '');
-      fd.append('title', titleRef.current?.value || '');
-      fd.append('edmsDocId', edmsRef.current?.value || '');
-      fd.append('documentType', docType);
-      fd.append('language', language);
-      fd.append('status', status);
+      const f = formRef.current;
+      Object.entries(f).forEach(([k, v]) => fd.append(k, v));
       fd.append('file', file);
-
       const { data } = mode === 'new'
         ? await adminApi.upload(fd)
-        : await adminApi.addVersion(slugRef.current?.value || '', fd);
-
+        : await adminApi.addVersion(f.slug, fd);
       setResult({ success: true, ...data });
-
       if (mode === 'new') {
-        if (slugRef.current) slugRef.current.value = '';
-        if (productCodeRef.current) productCodeRef.current.value = '';
-        if (productNameRef.current) productNameRef.current.value = '';
-        if (edmsRef.current) edmsRef.current.value = '';
+        formRef.current.slug = '';
+        formRef.current.productCode = '';
+        formRef.current.productName = '';
+        formRef.current.edmsDocId = '';
       }
       setFile(null);
       if (fileRef.current) fileRef.current.value = '';
@@ -87,25 +78,40 @@ export default function AdminPage() {
 
   const handlePublish = async (slug: string) => {
     try { await adminApi.publish(slug); loadDocs(); }
-    catch (e: any) { alert('Failed'); }
+    catch { alert('Failed'); }
   };
 
   const handleArchive = async (slug: string) => {
     if (!confirm('Archive ' + slug + '?')) return;
     try { await adminApi.archive(slug); loadDocs(); }
-    catch (e: any) { alert('Failed'); }
+    catch { alert('Failed'); }
   };
 
-  const Field = ({ label, refObj, placeholder }: { label: string; refObj: React.RefObject<HTMLInputElement>; placeholder?: string }) => (
+  // Simple uncontrolled text input — reads/writes directly to formRef
+  const F = ({ label, field, placeholder }: { label: string; field: keyof typeof formRef.current; placeholder?: string }) => (
     <div>
       <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</label>
       <input
-        ref={refObj}
         type="text"
-        defaultValue=""
+        defaultValue={formRef.current[field]}
         placeholder={placeholder}
+        onChange={e => { formRef.current[field] = e.target.value as any; }}
         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
       />
+    </div>
+  );
+
+  // Uncontrolled select — no state, just writes to formRef
+  const S = ({ label, field, options }: { label: string; field: keyof typeof formRef.current; options: string[] }) => (
+    <div>
+      <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</label>
+      <select
+        defaultValue={formRef.current[field]}
+        onChange={e => { formRef.current[field] = e.target.value as any; }}
+        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+      >
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
     </div>
   );
 
@@ -139,44 +145,26 @@ export default function AdminPage() {
         {(mode === 'new' || mode === 'version') && (
           <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Slug (stable ID)" refObj={slugRef} placeholder="cardiotrack-x1--ifu-en" />
-              <Field label="Device code" refObj={productCodeRef} placeholder="CardioTrack-X1" />
+              <F label="Slug (stable ID)" field="slug" placeholder="cardiotrack-x1--ifu-en" />
+              <F label="Device code" field="productCode" placeholder="CardioTrack-X1" />
             </div>
             {mode === 'new' && (
-              <Field label="Device name" refObj={productNameRef} placeholder="CardioTrack-X1 Cardiac Monitor" />
+              <F label="Device name" field="productName" placeholder="CardioTrack-X1 Cardiac Monitor" />
             )}
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Version number" refObj={versionRef} placeholder="1.0" />
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Document type</label>
-                <select value={docType} onChange={e => setDocType(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
-                  {DOC_TYPES.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-              </div>
+              <F label="Version number" field="versionNumber" placeholder="1.0" />
+              <S label="Document type" field="documentType" options={DOC_TYPES} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Language</label>
-                <select value={language} onChange={e => setLanguage(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
-                  {LANGUAGES.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-              </div>
-              <Field label="Product category" refObj={categoryRef} placeholder="Medical Devices" />
+              <S label="Language" field="language" options={LANGUAGES} />
+              <F label="Product category" field="productCategory" placeholder="Medical Devices" />
             </div>
-            <Field label="Title (optional)" refObj={titleRef} placeholder="Instructions for Use" />
-            <Field label="EDMS Doc ID (optional)" refObj={edmsRef} placeholder="OXDX-12345" />
+            <F label="Title (optional)" field="title" placeholder="Instructions for Use" />
+            <F label="EDMS Doc ID (optional)" field="edmsDocId" placeholder="OXDX-12345" />
             {mode === 'new' && (
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Status</label>
-                <select value={status} onChange={e => setStatus(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-white">
-                  <option value="draft">draft</option>
-                  <option value="published">published</option>
-                </select>
-              </div>
+              <S label="Status" field="status" options={['draft', 'published']} />
             )}
+
             <div>
               <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">PDF file *</label>
               <div
@@ -193,6 +181,7 @@ export default function AdminPage() {
                   onChange={e => setFile(e.target.files?.[0] || null)} />
               </div>
             </div>
+
             <button type="submit" disabled={loading}
               className="w-full bg-red-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-red-700 disabled:opacity-50 transition-colors">
               {loading ? 'Uploading...' : mode === 'new' ? 'Create document' : 'Add new version'}
@@ -226,7 +215,7 @@ export default function AdminPage() {
                     <div key={doc.slug} className="bg-white border border-gray-200 rounded-lg p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="text-xs font-mono bg-gray-100 text-gray-400 px-2 py-0.5 rounded">{doc.productCode}</span>
                             <span className={`text-xs px-2 py-0.5 rounded font-medium ${SC[doc.status] || SC.draft}`}>{doc.status}</span>
                             <span className="text-xs text-gray-400">{doc.versions?.length} version(s)</span>
