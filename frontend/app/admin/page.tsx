@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import { adminApi } from '@/lib/api';
 
@@ -159,7 +159,7 @@ export default function AdminPage() {
             >
                How It Works</a>
             <a href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">
-              &lt;- Public site
+              <- Public site
             </a>
           </div>
         </div>
@@ -194,12 +194,12 @@ export default function AdminPage() {
               <Input
                 label="Slug (stable ID)"
                 field="slug"
-                placeholder="sikaflex-221--tds-en"
+                placeholder="oxdxflex-221--tds-en"
               />
               <Input
                 label="Product code"
                 field="productCode"
-                placeholder="SikaFlex-221"
+                placeholder="OXDXFlex-221"
               />
             </div>
 
@@ -207,7 +207,7 @@ export default function AdminPage() {
               <Input
                 label="Product name"
                 field="productName"
-                placeholder="SikaFlex-221 Polyurethane Sealant"
+                placeholder="OXDXFlex-221 Polyurethane Sealant"
               />
             )}
 
@@ -412,4 +412,3 @@ export default function AdminPage() {
     </main>
   );
 }
-

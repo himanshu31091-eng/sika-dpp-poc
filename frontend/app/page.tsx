@@ -55,14 +55,14 @@ export default function HomePage() {
             </div>
             <div>
               <h1 className="text-base font-semibold text-gray-900 leading-tight">
-                Sika Public Document Repository
+                OXDX Public Document Repository
               </h1>
-              <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>
+              <p className="text-xs text-gray-400">Medical Device Documentation &amp; Technical Documentation</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-              EU CPR Compliant
+              ISO 13485 Compliant
             </span>
             <a
               href="/admin"
@@ -78,7 +78,7 @@ export default function HomePage() {
         {/* Hero search */}
         <div className="text-center mb-12">
           <h2 className="text-3xl font-semibold text-gray-800 mb-3">
-            Find product documentation
+            Find regulatory documentation
           </h2>
           <p className="text-gray-500 text-sm mb-8 max-w-lg mx-auto">
             Access safety data sheets, technical documentation, declarations of
@@ -91,7 +91,7 @@ export default function HomePage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && search()}
-              placeholder="e.g. SikaFlex-221, SDS, product code..."
+              placeholder="e.g. OXDXFlex-221, SDS, device code..."
               className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm
                          focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent
                          shadow-sm"
@@ -162,7 +162,7 @@ export default function HomePage() {
         {!searched && (
           <div className="grid grid-cols-3 gap-4 mt-8">
             {[
-              { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for DPP compliance' },
+              { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for MDD compliance' },
               { icon: '📋', title: 'Version history', desc: 'Full audit trail — no documents ever deleted' },
               { icon: '🔒', title: 'No login required', desc: 'Public access with no account or registration' },
             ].map((t) => (
