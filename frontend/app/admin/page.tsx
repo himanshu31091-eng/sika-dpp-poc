@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useRef, useEffect } from 'react';
 import { adminApi } from '@/lib/api';
 
@@ -159,7 +159,7 @@ export default function AdminPage() {
             >
                How It Works</a>
             <a href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">
-              <- Public site
+              Back to site
             </a>
           </div>
         </div>
@@ -412,3 +412,4 @@ export default function AdminPage() {
     </main>
   );
 }
+
