@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -9,7 +9,7 @@ const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: '*',
   methods: ['GET', 'POST', 'PATCH'],
   allowedHeaders: ['Content-Type', 'x-api-key'],
 }));
@@ -48,3 +48,4 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/sika_dpp'
     console.error('Make sure MongoDB is running: check Services or run "mongod"');
     process.exit(1);
   });
+
