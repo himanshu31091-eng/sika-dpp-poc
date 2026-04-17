@@ -144,8 +144,8 @@ export default function DocContent() {
   const isLatest = doc.isLatest !== false;
   const pdfProxyUrl = `/api/pdf-proxy?slug=${slug}&version=${version.versionNumber}`;
   const downloadUrl = publicApi.getDownloadUrl(slug, version.versionNumber);
-  const dynamicUrl = typeof window !== 'undefined' ? `${'https://sika-dpp-poc-7x1n.vercel.app'}/docs/${slug}/latest` : '';
-  const versionUrl = typeof window !== 'undefined' ? `${'https://sika-dpp-poc-7x1n.vercel.app'}/docs/${slug}/v/${version.versionNumber}` : '';
+  const dynamicUrl = `https://sika-dpp-poc-7x1n.vercel.app/docs/${slug}`;
+  const versionUrl = `https://sika-dpp-poc-7x1n.vercel.app/docs/${slug}?v=${version.versionNumber}`;
 
   return (
     <>
