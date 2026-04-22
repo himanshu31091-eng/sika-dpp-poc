@@ -55,14 +55,14 @@ export default function HomePage() {
             </div>
             <div>
               <h1 className="text-base font-semibold text-gray-900 leading-tight">
-                OXDX Public Document Repository
+                MoreYeahs Document Repository
               </h1>
-              <p className="text-xs text-gray-400">Medical Device Documentation &amp; Technical Documentation</p>
+              <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-              ISO 13485 Compliant
+              EU CPR Compliant
             </span>
             <a
               href="/admin"
@@ -78,7 +78,7 @@ export default function HomePage() {
         {/* Hero search */}
         <div className="text-center mb-12">
           <h2 className="text-3xl font-semibold text-gray-800 mb-3">
-            Find regulatory documentation
+            Find technical documentation
           </h2>
           <p className="text-gray-500 text-sm mb-8 max-w-lg mx-auto">
             Access safety data sheets, technical documentation, declarations of
@@ -91,7 +91,7 @@ export default function HomePage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && search()}
-              placeholder="e.g. OXDXFlex-221, SDS, device code..."
+              placeholder="e.g. MoreYeahsFlex-221, SDS, product code..."
               className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm
                          focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent
                          shadow-sm"

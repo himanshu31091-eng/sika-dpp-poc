@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 const sections = [
   {
     id: 'overview', icon: '1', color: 'blue', title: 'System Overview',
-    content: 'The OXDX Public Document Repository satisfies Healthcare Document Compliance (ISO 13485) requirements for public document access. It provides clean separation between internal EDMS (Optimal Systems) and the public-facing document delivery layer.',
+    content: 'The MoreYeahs Document Repository satisfies Healthcare Document Compliance (EU CPR) requirements for public document access. It provides clean separation between internal EDMS (Optimal Systems) and the public-facing document delivery layer.',
     items: [
       'Admin-only document upload with API key protection',
       'Public access with zero login or registration required',
@@ -18,14 +18,14 @@ const sections = [
   },
   {
     id: 'urls', icon: '2', color: 'green', title: 'URL Design and 10-Year Stability',
-    content: 'URL stability is the core requirement of the ISO 13485 Medical Device Documentation. URLs must remain valid for a minimum of 10 years after publication.',
+    content: 'URL stability is the core requirement of the EU CPR Digital Product Passports. URLs must remain valid for a minimum of 10 years after publication.',
     items: [
       'Dynamic URL format: /docs/{slug}/latest - always resolves to newest version',
       'Version-specific URL: /docs/{slug}/v/{version} - immutable forever',
       'Dynamic URLs use Cache-Control: no-store - never cached',
       'Version URLs use Cache-Control: immutable - 1 year browser cache',
       'Slug naming: {product-code}--{doc-type}-{language}',
-      'Example: oxdxflex-221--tds-en, oxdx-top-122--sds-de',
+      'Example: moreyeahsflex-221--tds-en, moreyeahs-top-122--sds-de',
       'Slugs are lowercase, hyphenated, never changed after creation',
     ],
   },
@@ -46,7 +46,7 @@ const sections = [
     id: 'api', icon: '4', color: 'purple', title: 'API Reference',
     content: 'The backend exposes two sets of routes - public (no auth) and admin (API key required).',
     items: [
-      'GET  /docs?q=query - search documents by device code or name',
+      'GET  /docs?q=query - search documents by product code or name',
       'GET  /docs/:slug/latest - dynamic URL, always newest (no auth)',
       'GET  /docs/:slug/v/:version - immutable version URL (no auth)',
       'GET  /docs/:slug/v/:version/download - serve PDF file (no auth)',
@@ -59,7 +59,7 @@ const sections = [
   },
   {
     id: 'document-types', icon: '5', color: 'teal', title: 'Supported Document Types',
-    content: 'All document types required by the ISO 13485 Medical Device Documentation specification are supported.',
+    content: 'All document types required by the EU CPR Digital Product Passports specification are supported.',
     items: [
       'DoPC - Declaration of Performance and Conformity',
       'SDS - Safety Data Sheet',
@@ -71,7 +71,7 @@ const sections = [
   },
   {
     id: 'metadata', icon: '6', color: 'red', title: 'Metadata Handling',
-    content: 'Internal OXDX metadata is never exposed to public users. Separation is enforced at the API model level.',
+    content: 'Internal MoreYeahs metadata is never exposed to public users. Separation is enforced at the API model level.',
     items: [
       'Public: document title, language, product category, document type',
       'Public: issue date, version number, upload date, file name and size',
@@ -97,7 +97,7 @@ const sections = [
   },
   {
     id: 'edms', icon: '8', color: 'gray', title: 'EDMS Integration',
-    content: 'Designed to integrate with OXDX\'s existing EDMS (Optimal Systems / yuuvis-rad) as the external-facing public layer.',
+    content: 'Designed to integrate with MoreYeahs\'s existing EDMS (Optimal Systems / yuuvis-rad) as the external-facing public layer.',
     items: [
       'POST /edms/push - webhook called by Optimal Systems when doc is approved',
       'Receives: EDMS Doc ID, version number, slug, product metadata',
@@ -178,12 +178,12 @@ export default function HowItWorksContent() {
             <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white text-xl font-bold">S</span>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">OXDX Public Document Repository</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">MoreYeahs Document Repository</h2>
             <p className="text-gray-500 text-sm max-w-xl mx-auto mb-4">
               Complete technical reference - architecture, features, API, URL design, security and production checklist.
             </p>
             <div className="flex items-center justify-center gap-2 flex-wrap">
-              <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">ISO 13485 Compliant</span>
+              <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">EU CPR Compliant</span>
               <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">POC v1.0</span>
               <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">Next.js + Node.js + MongoDB</span>
             </div>
@@ -227,7 +227,7 @@ export default function HowItWorksContent() {
             })}
           </div>
           <div className="mt-8 text-center text-xs text-gray-400 pb-8 no-print">
-            OXDX Public Document Repository - POC v1.0 - Built for ISO 13485 Compliance
+            MoreYeahs Document Repository - POC v1.0 - Built for EU CPR Compliance
           </div>
         </div>
       </main>

@@ -146,10 +146,10 @@ export default function AdminPage() {
           <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <F label="Slug (stable ID)" field="slug" placeholder="cardiotrack-x1--ifu-en" />
-              <F label="Device code" field="productCode" placeholder="CardioTrack-X1" />
+              <F label="Product code" field="productCode" placeholder="CardioTrack-X1" />
             </div>
             {mode === 'new' && (
-              <F label="Device name" field="productName" placeholder="CardioTrack-X1 Cardiac Monitor" />
+              <F label="Product name" field="productName" placeholder="CardioTrack-X1 Cardiac Monitor" />
             )}
             <div className="grid grid-cols-2 gap-4">
               <F label="Version number" field="versionNumber" placeholder="1.0" />
@@ -160,7 +160,7 @@ export default function AdminPage() {
               <F label="Product category" field="productCategory" placeholder="Medical Devices" />
             </div>
             <F label="Title (optional)" field="title" placeholder="Instructions for Use" />
-            <F label="EDMS Doc ID (optional)" field="edmsDocId" placeholder="OXDX-12345" />
+            <F label="EDMS Doc ID (optional)" field="edmsDocId" placeholder="MoreYeahs-12345" />
             {mode === 'new' && (
               <S label="Status" field="status" options={['draft', 'published']} />
             )}
