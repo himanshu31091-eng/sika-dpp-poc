@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/api';
 
 const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical', 'Other'];
@@ -18,6 +19,9 @@ const SC: Record<string, string> = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [currentUser, setCurrentUser] = useState('');
   const [mode, setMode] = useState<Mode>('new');
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
@@ -39,6 +43,23 @@ export default function AdminPage() {
     edmsDocId: '',
     status: 'draft',
   });
+
+  useEffect(() => {
+    const auth = localStorage.getItem('admin_auth');
+    const user = localStorage.getItem('admin_user') || '';
+    if (!auth) {
+      router.replace('/admin/login');
+    } else {
+      setCurrentUser(user);
+      setAuthChecked(true);
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
+    localStorage.removeItem('admin_user');
+    router.replace('/admin/login');
+  };
 
   const loadDocs = useCallback(async () => {
     setDocsLoading(true);
@@ -115,6 +136,12 @@ export default function AdminPage() {
     </div>
   );
 
+  if (!authChecked) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 shadow-sm">
@@ -128,6 +155,10 @@ export default function AdminPage() {
               How It Works
             </a>
             <a href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">Back to site</a>
+            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
+              <span className="text-xs text-gray-400">👤 {currentUser}</span>
+              <button onClick={handleLogout} className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1.5 rounded hover:bg-gray-200 font-medium">Logout</button>
+            </div>
           </div>
         </div>
       </header>
