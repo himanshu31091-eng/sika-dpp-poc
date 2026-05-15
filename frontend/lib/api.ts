@@ -36,3 +36,4 @@ export const adminApi = {
   getOne: (slug: string) =>
     API.get(`/admin/documents/${slug}`, { headers: { 'x-api-key': ADMIN_KEY } }),
 };
+
