@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const fs = require('fs');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const Document = require('../models/Document');
-const { UPLOAD_DIR } = require('../config/storage');
+const { s3, S3_BUCKET } = require('../config/storage');
 const { publicRateLimit } = require('../middleware/auth');
 
 router.use(publicRateLimit);
@@ -123,23 +123,30 @@ router.get('/:slug/v/:version', async (req, res) => {
   }
 });
 
-// GET /docs/:slug/v/:version/download — serve PDF directly from disk
+// GET /docs/:slug/v/:version/download — generate S3 signed URL and redirect to it
 router.get('/:slug/v/:version/download', async (req, res) => {
   try {
     const doc = await Document.findOne({ slug: req.params.slug, status: 'published' });
     if (!doc) return res.status(404).json({ error: 'Not found' });
+
     const version = doc.versions.find(v => v.versionNumber === req.params.version);
     if (!version) return res.status(404).json({ error: 'Version not found' });
 
-    const filePath = path.resolve(UPLOAD_DIR, version.fileKey);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'File not found on disk' });
-    }
+    // version.fileKey is the S3 object key (e.g. "documents/sikaflex-221--tds-en/abc-123.pdf")
+    const command = new GetObjectCommand({
+      Bucket: S3_BUCKET,
+      Key: version.fileKey,
+      ResponseContentDisposition: `inline; filename="${version.fileName}"`,
+      ResponseContentType: 'application/pdf',
+    });
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${version.fileName}"`);
-    res.sendFile(filePath);
+    // Signed URL valid for 5 minutes — long enough to download, short enough to be safe
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+
+    // 302 redirect so the browser fetches the PDF directly from S3 (no proxy through backend)
+    res.redirect(302, signedUrl);
   } catch (err) {
+    console.error('[Download error]', err);
     res.status(500).json({ error: err.message });
   }
 });

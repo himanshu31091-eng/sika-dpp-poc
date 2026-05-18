@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
 const Document = require('../models/Document');
 const { upload } = require('../config/storage');
 const { adminAuth } = require('../middleware/auth');
@@ -33,8 +32,8 @@ router.post('/documents', upload.single('file'), async (req, res) => {
       });
     }
 
-    // Store relative path so it works across machines
-    const fileKey = path.join(slug, req.file.filename);
+    // multer-s3 puts the S3 object key on req.file.key
+    const fileKey = req.file.key;
 
     const doc = new Document({
       slug, productCode, productName, status,
@@ -84,7 +83,8 @@ router.patch('/documents/:slug/versions', upload.single('file'), async (req, res
 
     doc.versions[doc.latestVersionIndex].supersededAt = new Date();
 
-    const fileKey = path.join(req.params.slug, req.file.filename);
+    // multer-s3 puts the S3 object key on req.file.key
+    const fileKey = req.file.key;
 
     doc.versions.push({
       versionNumber,

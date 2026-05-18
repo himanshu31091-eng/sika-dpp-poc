@@ -1,36 +1,48 @@
+const { S3Client } = require('@aws-sdk/client-s3');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const multerS3 = require('multer-s3');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
-// Create uploads directory if it doesn't exist
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Organise by slug: uploads/sikaflex-221--tds-en/
-    const slug = req.body.slug || req.params.slug || 'unknown';
-    const dir = path.join(UPLOAD_DIR, slug);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    // UUID filename so versions never overwrite each other
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`);
+// Initialise S3 client (eu-central-1, Frankfurt for EU data residency)
+const s3 = new S3Client({
+  region: process.env.AWS_REGION || 'eu-central-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
+const S3_BUCKET = process.env.S3_BUCKET;
+
+// Multer storage configured to upload directly to S3
 const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  storage: multerS3({
+    s3: s3,
+    bucket: S3_BUCKET,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    // Each file gets a unique key under documents/<slug>/<uuid>.pdf
+    key: (req, file, cb) => {
+      const slug = req.body.slug || req.params.slug || 'unknown';
+      const ext = path.extname(file.originalname) || '.pdf';
+      const key = `documents/${slug}/${uuidv4()}${ext}`;
+      cb(null, key);
+    },
+    metadata: (req, file, cb) => {
+      cb(null, {
+        originalName: file.originalname,
+        uploadedAt: new Date().toISOString(),
+      });
+    },
+  }),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') cb(null, true);
-    else cb(new Error('Only PDF files are accepted'));
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are accepted'));
+    }
   },
 });
 
-module.exports = { upload, UPLOAD_DIR };
+module.exports = { s3, upload, S3_BUCKET };
