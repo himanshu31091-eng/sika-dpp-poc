@@ -13,9 +13,9 @@ interface DocItem {
 }
 
 const SC: Record<string, string> = {
-  published: 'bg-green-100 text-green-700',
-  draft: 'bg-yellow-100 text-yellow-700',
-  archived: 'bg-gray-100 text-gray-500',
+  published: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  draft:     'bg-amber-50 text-amber-700 border border-amber-200',
+  archived:  'bg-gray-50 text-gray-500 border border-gray-200',
 };
 
 export default function AdminPage() {
@@ -217,37 +217,60 @@ export default function AdminPage() {
 
   if (!authChecked) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+      <div className="text-center animate-fade-in">
+        <div className="w-10 h-10 border-2 border-sika-red border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-sm text-gray-400">Loading admin panel…</p>
+      </div>
     </div>
   );
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold text-gray-900">Admin Panel</h1>
-            <p className="text-xs text-gray-400 mt-0.5">Document management - POC</p>
-          </div>
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-card">
+        <div className="max-w-3xl mx-auto px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <a href="/how-it-works" className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg border border-blue-200 font-medium hover:bg-blue-100">
+            <div className="w-8 h-8 bg-sika-red rounded-lg flex items-center justify-center shadow-red-sm">
+              <span className="text-white text-sm font-bold leading-none">S</span>
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-gray-900">Admin Panel</h1>
+              <p className="text-xs text-gray-400">Document management</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href="/how-it-works"
+              className="hidden sm:flex text-xs text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-100 transition-colors duration-200">
               How It Works
             </a>
-            <a href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">Back to site</a>
-            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
-              <span className="text-xs text-gray-400">👤 {currentUser}</span>
-              <button onClick={handleLogout} className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1.5 rounded hover:bg-gray-200 font-medium">Logout</button>
+            <a href="/" className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5 border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200">
+              ← Site
+            </a>
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-100">
+              <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 px-2.5 py-1.5 rounded-lg">
+                <div className="w-5 h-5 bg-sika-red rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold leading-none">{currentUser[0]?.toUpperCase()}</span>
+                </div>
+                <span className="text-xs font-medium text-gray-700">{currentUser}</span>
+              </div>
+              <button onClick={handleLogout}
+                className="text-xs text-gray-500 border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-700 font-medium transition-all duration-200">
+                Logout
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-3xl mx-auto px-6 py-8">
-        <div className="flex bg-gray-100 rounded-lg p-1 mb-6 w-fit gap-1">
+        <div className="flex bg-gray-100/80 backdrop-blur rounded-xl p-1 mb-8 w-fit gap-0.5 shadow-inner-sm">
           {(currentUser === 'himanshu' ? ['dashboard', 'new', 'version', 'list', 'edms'] : ['new', 'version', 'list'] as Mode[]).map(k => (
             <button key={k} onClick={() => setMode(k as Mode)}
-              className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${mode === k ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              {k === 'dashboard' ? 'Dashboard' : k === 'new' ? 'New document' : k === 'version' ? 'Add version' : k === 'list' ? 'All documents' : 'EDMS Demo'}
+              className={`px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 btn-press ${
+                mode === k
+                  ? 'bg-white shadow-card text-gray-900 scale-[1.02]'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'
+              }`}>
+              {k === 'dashboard' ? '◈ Dashboard' : k === 'new' ? '+ New document' : k === 'version' ? '↑ Add version' : k === 'list' ? '☰ All documents' : '⇄ EDMS Demo'}
             </button>
           ))}
         </div>
@@ -261,51 +284,56 @@ export default function AdminPage() {
           return (
             <div className="space-y-6">
               {dashboardLoading ? (
-                <p className="text-center text-gray-400 text-sm py-12">Loading...</p>
+                <div className="py-16 text-center animate-fade-in">
+                  <div className="w-8 h-8 border-2 border-sika-red border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                  <p className="text-sm text-gray-400">Loading dashboard…</p>
+                </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 stagger animate-slide-up">
                     {[
-                      { label: 'Total', value: total, color: 'bg-blue-50 text-blue-700 border-blue-200' },
-                      { label: 'Published', value: published, color: 'bg-green-50 text-green-700 border-green-200' },
-                      { label: 'Drafts', value: drafts.length, color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-                      { label: 'Archived', value: archived, color: 'bg-gray-50 text-gray-500 border-gray-200' },
+                      { label: 'Total',     value: total,          icon: '📄', bg: 'from-slate-800 to-slate-700',   text: 'text-white' },
+                      { label: 'Published', value: published,      icon: '✓',  bg: 'from-emerald-600 to-emerald-500', text: 'text-white' },
+                      { label: 'Drafts',    value: drafts.length,  icon: '✎',  bg: 'from-amber-500 to-amber-400',    text: 'text-white' },
+                      { label: 'Archived',  value: archived,       icon: '⊘',  bg: 'from-gray-400 to-gray-300',      text: 'text-white' },
                     ].map(card => (
-                      <div key={card.label} className={`rounded-lg border p-4 ${card.color}`}>
-                        <p className="text-xs font-medium uppercase tracking-wide opacity-70">{card.label}</p>
-                        <p className="text-3xl font-bold mt-1">{card.value}</p>
+                      <div key={card.label} className={`rounded-xl p-5 bg-gradient-to-br ${card.bg} shadow-card-md animate-slide-up`}>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">{card.label}</p>
+                        <p className="text-4xl font-bold text-white leading-none">{card.value}</p>
                       </div>
                     ))}
                   </div>
 
                   {analytics && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 animate-slide-up">
                       {[
-                        { label: 'Total views', value: analytics.totalViews, color: 'bg-purple-50 text-purple-700 border-purple-200' },
-                        { label: 'Total downloads', value: analytics.totalDownloads, color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                        { label: 'Total Views',     value: analytics.totalViews,     icon: '👁', bg: 'from-violet-600 to-violet-500' },
+                        { label: 'Total Downloads', value: analytics.totalDownloads, icon: '↓',  bg: 'from-indigo-600 to-indigo-500' },
                       ].map(card => (
-                        <div key={card.label} className={`rounded-lg border p-4 ${card.color}`}>
-                          <p className="text-xs font-medium uppercase tracking-wide opacity-70">{card.label}</p>
-                          <p className="text-3xl font-bold mt-1">{card.value}</p>
+                        <div key={card.label} className={`rounded-xl p-5 bg-gradient-to-br ${card.bg} shadow-card-md`}>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-2">{card.label}</p>
+                          <p className="text-4xl font-bold text-white leading-none">{card.value}</p>
                         </div>
                       ))}
                     </div>
                   )}
 
                   {drafts.length > 0 && (
-                    <div className="bg-white border border-yellow-200 rounded-lg p-4">
-                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Drafts pending publish ({drafts.length})</h2>
+                    <div className="bg-white border border-amber-200 rounded-xl p-5 shadow-card animate-slide-up">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-xs font-bold">{drafts.length}</span>
+                        <h2 className="text-sm font-semibold text-gray-800">Drafts pending publish</h2>
+                      </div>
                       <div className="space-y-2">
                         {drafts.map(doc => (
-                          <div key={doc.slug} className="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
+                          <div key={doc.slug} className="flex items-center justify-between gap-4 py-2.5 px-3 rounded-lg hover:bg-amber-50 transition-colors duration-150">
                             <div>
                               <p className="text-sm font-medium text-gray-800">{doc.productName}</p>
-                              <p className="text-xs text-gray-400">{doc.productCode} · {doc.versions?.length} version(s)</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{doc.productCode} · {doc.versions?.length} version(s)</p>
                             </div>
                             <button
                               onClick={async () => { try { await adminApi.publish(doc.slug); loadDashboard(); } catch { alert('Failed'); } }}
-                              className="text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium shrink-0"
-                            >
+                              className="btn-press text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 font-semibold shrink-0 shadow-sm transition-colors duration-200">
                               Publish
                             </button>
                           </div>
@@ -315,39 +343,56 @@ export default function AdminPage() {
                   )}
 
                   {analytics && analytics.byDocument.length > 0 && (
-                    <div className="bg-white border border-gray-200 rounded-lg p-4">
-                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Top documents by activity</h2>
-                      <div className="space-y-2">
-                        {analytics.byDocument.slice(0, 5).map((item: any) => (
-                          <div key={item.slug} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
-                            <p className="text-sm text-gray-700 truncate flex-1 mr-4">{item.slug}</p>
-                            <div className="flex gap-3 shrink-0 text-xs">
-                              <span className="text-purple-600">{item.views} views</span>
-                              <span className="text-indigo-600">{item.downloads} dl</span>
+                    <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-card animate-slide-up">
+                      <h2 className="text-sm font-semibold text-gray-800 mb-4">Top documents by activity</h2>
+                      <div className="space-y-1">
+                        {analytics.byDocument.slice(0, 5).map((item: any, i: number) => {
+                          const total = item.views + item.downloads;
+                          const max = analytics.byDocument[0].views + analytics.byDocument[0].downloads || 1;
+                          return (
+                            <div key={item.slug} className="group">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="text-xs font-mono text-gray-300 w-4">{i+1}</span>
+                                  <p className="text-xs text-gray-700 truncate font-medium">{item.slug}</p>
+                                </div>
+                                <div className="flex gap-3 shrink-0 text-xs ml-3">
+                                  <span className="text-violet-600 font-medium">{item.views}v</span>
+                                  <span className="text-indigo-600 font-medium">{item.downloads}d</span>
+                                </div>
+                              </div>
+                              <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-500"
+                                  style={{ width: `${(total / max) * 100}%` }} />
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
 
-                  <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-sm font-semibold text-gray-700">Recently updated</h2>
-                      <button onClick={loadDashboard} className="text-xs text-gray-400 hover:text-gray-600 underline">Refresh</button>
+                  <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-card animate-slide-up">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-sm font-semibold text-gray-800">Recently updated</h2>
+                      <button onClick={loadDashboard}
+                        className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors duration-200">
+                        ↺ Refresh
+                      </button>
                     </div>
                     {recent.length === 0 ? (
-                      <p className="text-sm text-gray-400 py-4 text-center">No documents yet</p>
+                      <p className="text-sm text-gray-400 py-6 text-center">No documents yet</p>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-1 stagger">
                         {recent.map(doc => (
-                          <div key={doc.slug} className="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
-                            <div>
-                              <p className="text-sm font-medium text-gray-800">{doc.productName}</p>
-                              <p className="text-xs text-gray-400">{doc.productCode}</p>
+                          <div key={doc.slug}
+                            className="flex items-center justify-between gap-4 py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors duration-150 animate-fade-in">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-800 truncate">{doc.productName}</p>
+                              <p className="text-xs text-gray-400 mt-0.5 font-mono">{doc.productCode}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${SC[doc.status] || SC.draft}`}>{doc.status}</span>
+                              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${SC[doc.status] || SC.draft}`}>{doc.status}</span>
                               <span className="text-xs text-gray-300">{new Date(doc.updatedAt).toLocaleDateString()}</span>
                             </div>
                           </div>
@@ -356,9 +401,9 @@ export default function AdminPage() {
                     )}
                   </div>
                   {auditLogs.length > 0 && (
-                    <div className="bg-white border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-sm font-semibold text-gray-700">Recent activity</h2>
+                    <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-card animate-slide-up">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-sm font-semibold text-gray-800">Audit log</h2>
                         <button
                           onClick={() => {
                             const header = 'Timestamp,Action,Slug,Version,Performed By,IP\n';
@@ -377,23 +422,38 @@ export default function AdminPage() {
                         </button>
                       </div>
                       <div className="space-y-1">
-                        {auditLogs.map((log: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0 gap-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${
-                                log.action === 'publish' ? 'bg-green-100 text-green-700' :
-                                log.action === 'archive' ? 'bg-gray-100 text-gray-500' :
-                                log.action === 'create' ? 'bg-blue-100 text-blue-700' :
-                                'bg-yellow-100 text-yellow-700'
-                              }`}>{log.action}</span>
-                              <span className="text-xs text-gray-600 truncate">{log.slug}{log.version ? ` v${log.version}` : ''}</span>
+                        {auditLogs.map((log: any, i: number) => {
+                          const actionStyle: Record<string, string> = {
+                            publish:     'bg-emerald-100 text-emerald-700',
+                            archive:     'bg-gray-100 text-gray-500',
+                            create:      'bg-blue-100 text-blue-700',
+                            add_version: 'bg-violet-100 text-violet-700',
+                          };
+                          const actionIcon: Record<string, string> = {
+                            publish: '✓', archive: '⊘', create: '+', add_version: '↑',
+                          };
+                          return (
+                            <div key={i} className="flex items-start gap-3 py-2 group animate-fade-in">
+                              <div className="flex flex-col items-center shrink-0 mt-0.5">
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${actionStyle[log.action] || 'bg-gray-100 text-gray-500'}`}>
+                                  {actionIcon[log.action] || '?'}
+                                </span>
+                                {i < auditLogs.length - 1 && <div className="w-px h-3 bg-gray-100 mt-1" />}
+                              </div>
+                              <div className="flex-1 min-w-0 pb-2 border-b border-gray-50 last:border-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-semibold text-gray-700 capitalize">{log.action.replace('_', ' ')}</span>
+                                  <span className="text-xs text-gray-300 shrink-0">{new Date(log.timestamp).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-xs text-gray-400 truncate mt-0.5">
+                                  <span className="font-mono">{log.slug}</span>
+                                  {log.version && <span className="text-gray-300"> · v{log.version}</span>}
+                                  <span className="text-gray-300"> · {log.performedBy}</span>
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 text-xs text-gray-400">
-                              <span>{log.performedBy}</span>
-                              <span>{new Date(log.timestamp).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}

@@ -146,32 +146,35 @@ function DocContent() {
 
       <main className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-card sticky top-0 z-20">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <button onClick={() => router.push('/')} className="text-gray-400 hover:text-gray-600 text-sm shrink-0">
-                &#8592;
+            <div className="flex items-center gap-2.5 min-w-0">
+              <button onClick={() => router.push('/')}
+                className="text-gray-400 hover:text-gray-700 text-sm shrink-0 w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-all duration-200">
+                ←
               </button>
+              <div className="w-px h-4 bg-gray-200 shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">{doc.productCode}</span>
-                  <span className="text-sm font-medium text-gray-800 truncate">{doc.productName}</span>
+                  <span className="text-xs font-mono text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded font-semibold shrink-0">
+                    {doc.productCode}
+                  </span>
+                  <span className="text-sm font-semibold text-gray-800 truncate">{doc.productName}</span>
                   {isLatest
-                    ? <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full shrink-0">latest</span>
-                    : <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full shrink-0">archived</span>
+                    ? <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-medium shrink-0">latest</span>
+                    : <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium shrink-0">archived</span>
                   }
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {/* Mobile info toggle */}
               <button onClick={() => setShowInfo(!showInfo)}
-                className="md:hidden text-xs bg-gray-100 text-gray-600 px-2.5 py-1.5 rounded font-medium">
-                {showInfo ? 'Hide info' : 'Info'}
+                className="md:hidden text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2.5 py-1.5 rounded-lg font-medium transition-colors duration-200">
+                {showInfo ? 'Hide' : 'Info'}
               </button>
               <a href={downloadUrl} target="_blank" rel="noopener noreferrer"
-                className="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-medium hover:bg-red-700">
-                Download
+                className="btn-press text-xs bg-sika-red hover:bg-sika-red-dark text-white px-4 py-1.5 rounded-lg font-semibold shadow-red-sm transition-colors duration-200">
+                ↓ Download
               </a>
             </div>
           </div>
@@ -179,11 +182,16 @@ function DocContent() {
 
         {/* Archived banner */}
         {!isLatest && (
-          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-between">
-            <p className="text-xs text-amber-700">Archived version ({version.versionNumber}) — superseded.</p>
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between animate-slide-down">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-500">⚠</span>
+              <p className="text-xs text-amber-700 font-medium">
+                Archived version {version.versionNumber} — a newer version is available.
+              </p>
+            </div>
             <button onClick={() => router.push(`/docs/${slug}`)}
-              className="text-xs bg-amber-600 text-white px-2.5 py-1 rounded font-medium ml-3 shrink-0">
-              View latest
+              className="btn-press text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-semibold ml-3 shrink-0 transition-colors duration-200">
+              View latest →
             </button>
           </div>
         )}
@@ -261,40 +269,51 @@ function DocContent() {
           {/* Desktop layout */}
           <div className="flex gap-5">
             {/* Desktop sidebar */}
-            <aside className="hidden md:block w-64 shrink-0 space-y-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Document info</p>
-                <dl className="space-y-2">
-                  <div><dt className="text-xs text-gray-400">Type</dt><dd className="text-xs font-medium text-gray-700">{DOC_TYPE_LABELS[version.documentType || ''] || version.documentType || '—'}</dd></div>
-                  <div><dt className="text-xs text-gray-400">Language</dt><dd className="text-xs text-gray-700">{version.language || '—'}</dd></div>
-                  <div><dt className="text-xs text-gray-400">Version</dt><dd className="text-xs font-mono text-gray-700">{version.versionNumber}</dd></div>
-                  <div><dt className="text-xs text-gray-400">File size</dt><dd className="text-xs text-gray-700">{formatBytes(version.fileSize)}</dd></div>
-                  <div><dt className="text-xs text-gray-400">Uploaded</dt><dd className="text-xs text-gray-700">{new Date(version.uploadedAt).toLocaleDateString()}</dd></div>
+            <aside className="hidden md:block w-64 shrink-0 space-y-3 animate-slide-up">
+              <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-card">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Document info</p>
+                <dl className="space-y-2.5">
+                  {[
+                    { label: 'Type',     value: DOC_TYPE_LABELS[version.documentType || ''] || version.documentType || '—' },
+                    { label: 'Language', value: version.language || '—' },
+                    { label: 'Version',  value: version.versionNumber, mono: true },
+                    { label: 'Size',     value: formatBytes(version.fileSize) },
+                    { label: 'Uploaded', value: new Date(version.uploadedAt).toLocaleDateString() },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between gap-2">
+                      <dt className="text-xs text-gray-400 shrink-0">{row.label}</dt>
+                      <dd className={`text-xs font-medium text-gray-700 text-right truncate ${row.mono ? 'font-mono bg-gray-50 px-1.5 py-0.5 rounded' : ''}`}>{row.value}</dd>
+                    </div>
+                  ))}
                 </dl>
               </div>
 
               {version.fileHash && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">File Integrity</span>
-                    <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">SHA-256</span>
+                <div className="bg-white border border-emerald-100 rounded-xl p-4 shadow-card">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-gray-700">File Integrity</span>
+                    <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">SHA-256</span>
                   </div>
-                  <div className="bg-gray-50 rounded px-2 py-2 mb-2">
-                    <code className="text-xs text-gray-600 break-all leading-relaxed">{version.fileHash}</code>
+                  <div className="bg-slate-900 rounded-lg px-3 py-2.5 mb-2.5">
+                    <code className="text-xs text-emerald-400 break-all leading-relaxed font-mono tracking-tight">{version.fileHash}</code>
                   </div>
                   <button
                     onClick={() => copy(version.fileHash!, 'hash')}
-                    className="w-full text-xs text-gray-400 hover:text-gray-600 border border-gray-200 rounded py-1 hover:bg-gray-50 transition-colors">
-                    {copied === 'hash' ? '✓ Copied' : 'Copy hash'}
+                    className={`btn-press w-full text-xs font-medium border rounded-lg py-1.5 transition-all duration-200 ${
+                      copied === 'hash'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-700'
+                    }`}>
+                    {copied === 'hash' ? '✓ Copied to clipboard' : 'Copy hash'}
                   </button>
-                  <p className="text-xs text-gray-300 mt-2 leading-relaxed">
-                    Verify the downloaded file matches this checksum to confirm authenticity.
+                  <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                    Verify your download matches this checksum to confirm document authenticity.
                   </p>
                 </div>
               )}
 
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Stable links</p>
+              <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-card">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Stable links</p>
                 <div className="space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-1">
@@ -319,8 +338,8 @@ function DocContent() {
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">QR Code</p>
+              <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-card">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">QR Code</p>
                 <div className="flex flex-col items-center">
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(dynamicUrl)}`}
                     alt="QR" className="w-32 h-32 rounded border border-gray-200" />
@@ -333,19 +352,24 @@ function DocContent() {
               </div>
 
               {versions.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Version history ({versions.length})</p>
+                <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-card">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Version history ({versions.length})</p>
                   <ul className="space-y-1">
                     {[...versions].reverse().map(v => (
                       <li key={v.versionNumber}>
                         <button
                           onClick={() => v.isLatest ? router.push(`/docs/${slug}`) : router.push(`/docs/${slug}?v=${v.versionNumber}`)}
-                          className={`w-full text-left flex items-center justify-between text-xs rounded px-2 py-1.5 transition-colors ${v.versionNumber === version.versionNumber ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-500 hover:bg-gray-50'}`}>
+                          className={`w-full text-left flex items-center justify-between text-xs rounded-lg px-2.5 py-2 transition-all duration-200 ${
+                            v.versionNumber === version.versionNumber
+                              ? 'bg-slate-800 text-white font-semibold shadow-sm'
+                              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                          }`}>
                           <span className="font-mono">v{v.versionNumber}</span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-gray-300">{new Date(v.uploadedAt).toLocaleDateString('en', { month: 'short', year: '2-digit' })}</span>
-                            {v.isLatest && <span className="text-green-500">●</span>}
-                            {v.supersededAt && !v.isLatest && <span className="text-gray-300 text-xs">archived</span>}
+                          <div className="flex items-center gap-1.5">
+                            <span className={v.versionNumber === version.versionNumber ? 'text-white/50' : 'text-gray-300'}>
+                              {new Date(v.uploadedAt).toLocaleDateString('en', { month: 'short', year: '2-digit' })}
+                            </span>
+                            {v.isLatest && <span className="text-emerald-500 text-xs">●</span>}
                           </div>
                         </button>
                       </li>
@@ -357,12 +381,15 @@ function DocContent() {
 
             {/* PDF viewer — takes full width on mobile */}
             <div className="flex-1 min-w-0">
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                <div className="px-3 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-                  <span className="text-xs text-gray-500 truncate">{version.fileName}</span>
+              <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-card-md">
+                <div className="px-4 py-2.5 border-b border-gray-100 bg-gray-50/80 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-red-500 shrink-0">📄</span>
+                    <span className="text-xs text-gray-600 font-medium truncate">{version.fileName}</span>
+                  </div>
                   <a href={downloadUrl} target="_blank" rel="noopener noreferrer"
-                    className="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-medium hover:bg-red-700 shrink-0 ml-2">
-                    Open PDF
+                    className="btn-press text-xs bg-sika-red hover:bg-sika-red-dark text-white px-3 py-1.5 rounded-lg font-semibold shrink-0 transition-colors duration-200 shadow-red-sm">
+                    Open PDF ↗
                   </a>
                 </div>
 

@@ -14,17 +14,37 @@ interface DocResult {
   dynamicUrl: string;
 }
 
-const DOC_TYPE_COLORS: Record<string, string> = {
-  DoPC:      'bg-red-100 text-red-700',
-  SDS:       'bg-orange-100 text-orange-700',
-  TDS:       'bg-blue-100 text-blue-700',
-  Label:     'bg-purple-100 text-purple-700',
-  Technical: 'bg-teal-100 text-teal-700',
-  Other:     'bg-gray-100 text-gray-600',
+const TYPE_STYLES: Record<string, { badge: string; dot: string }> = {
+  DoPC:      { badge: 'bg-red-50 text-red-700 border-red-200',       dot: 'bg-red-500' },
+  SDS:       { badge: 'bg-orange-50 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
+  TDS:       { badge: 'bg-blue-50 text-blue-700 border-blue-200',    dot: 'bg-blue-500' },
+  Label:     { badge: 'bg-purple-50 text-purple-700 border-purple-200', dot: 'bg-purple-500' },
+  Technical: { badge: 'bg-teal-50 text-teal-700 border-teal-200',    dot: 'bg-teal-500' },
+  Other:     { badge: 'bg-gray-100 text-gray-600 border-gray-200',   dot: 'bg-gray-400' },
 };
 
-const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical', 'Other'];
+const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT'];
+
+const FEATURES = [
+  { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance' },
+  { icon: '🔐', title: 'SHA-256 Verified', desc: 'Every PDF has a cryptographic integrity hash' },
+  { icon: '📋', title: 'Version history', desc: 'Full audit trail — nothing ever deleted' },
+  { icon: '🌍', title: 'No login required', desc: 'Fully public access, no account needed' },
+];
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-card">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="skeleton h-5 w-20" />
+        <div className="skeleton h-5 w-12" />
+      </div>
+      <div className="skeleton h-4 w-3/4 mb-2" />
+      <div className="skeleton h-3 w-1/2" />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [query, setQuery]           = useState('');
@@ -33,10 +53,10 @@ export default function HomePage() {
   const [searched, setSearched]     = useState(false);
   const [filterType, setFilterType] = useState('');
   const [filterLang, setFilterLang] = useState('');
+  const [focused, setFocused]       = useState(false);
   const router = useRouter();
 
-  const search = async (overrideQuery?: string) => {
-    const q = overrideQuery !== undefined ? overrideQuery : query;
+  const doSearch = async (q: string) => {
     setLoading(true);
     setSearched(true);
     try {
@@ -49,195 +69,231 @@ export default function HomePage() {
     }
   };
 
-  // Apply client-side filters on top of text search results
-  const filtered = useMemo(() => {
-    return results.filter(doc => {
-      if (filterType && doc.documentType !== filterType) return false;
-      if (filterLang && doc.language !== filterLang) return false;
-      return true;
-    });
-  }, [results, filterType, filterLang]);
+  const filtered = useMemo(() => results.filter(d => {
+    if (filterType && d.documentType !== filterType) return false;
+    if (filterLang && d.language !== filterLang) return false;
+    return true;
+  }), [results, filterType, filterLang]);
 
   const handleFilterType = (t: string) => {
     const next = filterType === t ? '' : t;
     setFilterType(next);
-    if (!searched) search('');
+    if (!searched) doSearch('');
   };
 
   const handleFilterLang = (l: string) => {
     const next = filterLang === l ? '' : l;
     setFilterLang(next);
-    if (!searched) search('');
+    if (!searched) doSearch('');
   };
-
-  const activeFilters = [
-    filterType && { label: filterType, clear: () => setFilterType('') },
-    filterLang && { label: filterLang, clear: () => setFilterLang('') },
-  ].filter(Boolean) as { label: string; clear: () => void }[];
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+
+      {/* ── Header ── */}
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-card">
+        <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold">S</span>
+            <div className="w-8 h-8 bg-sika-red rounded-lg flex items-center justify-center shadow-red-sm">
+              <span className="text-white text-sm font-bold leading-none">S</span>
             </div>
             <div>
-              <h1 className="text-base font-semibold text-gray-900 leading-tight">
-                MoreYeahs Document Repository
-              </h1>
+              <h1 className="text-sm font-semibold text-gray-900 leading-tight">MoreYeahs Document Repository</h1>
               <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">EU CPR Compliant</span>
-            <a href="/admin" className="text-xs text-gray-400 hover:text-gray-600 px-3 py-1.5 border border-gray-200 rounded-lg transition-colors">
-              Admin
+            <span className="hidden sm:flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-medium">
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              EU CPR Compliant
+            </span>
+            <a href="/admin" className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1.5 border border-gray-200 rounded-lg font-medium hover:border-gray-400 transition-all duration-200">
+              Admin →
             </a>
           </div>
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        {/* Hero search */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-semibold text-gray-800 mb-3">Find technical documentation</h2>
-          <p className="text-gray-500 text-sm mb-6 max-w-lg mx-auto">
-            Access safety data sheets, technical documentation, declarations of performance and conformity.
-            All documents are publicly available — no account required.
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden bg-[#0f172a]">
+        {/* grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        {/* red glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-sika-red rounded-full opacity-[0.08] blur-[80px]" />
+
+        <div className="relative max-w-5xl mx-auto px-6 py-20 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white/70 text-xs px-3 py-1.5 rounded-full mb-6 animate-fade-in">
+            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+            Public repository · No login required
+          </div>
+
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight animate-slide-up">
+            Find product<br />
+            <span className="gradient-text">documentation</span>
+          </h2>
+          <p className="text-white/50 text-sm sm:text-base mb-10 max-w-md mx-auto animate-slide-up" style={{ animationDelay: '80ms' }}>
+            Safety data sheets, declarations of performance, technical guides —
+            all SHA-256 verified and EU CPR compliant.
           </p>
-          <div className="flex gap-2 max-w-xl mx-auto">
-            <input
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && search()}
-              placeholder="Product name or code…"
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
-            />
-            <button onClick={() => search()} disabled={loading}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors shadow-sm">
-              {loading ? 'Searching…' : 'Search'}
-            </button>
+
+          {/* Search bar */}
+          <div className="max-w-xl mx-auto animate-slide-up" style={{ animationDelay: '140ms' }}>
+            <div className={`flex gap-0 bg-white rounded-xl overflow-hidden transition-all duration-300 ${focused ? 'shadow-[0_0_0_3px_rgba(204,0,0,0.35),0_8px_32px_rgba(0,0,0,0.3)]' : 'shadow-[0_4px_24px_rgba(0,0,0,0.25)]'}`}>
+              <input
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && doSearch(query)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                placeholder="Search by product name or code…"
+                className="flex-1 px-5 py-4 text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent font-medium"
+              />
+              <button
+                onClick={() => doSearch(query)}
+                disabled={loading}
+                className="btn-press bg-sika-red hover:bg-sika-red-dark text-white px-7 py-4 text-sm font-semibold transition-colors duration-200 disabled:opacity-60 flex items-center gap-2 shrink-0">
+                {loading
+                  ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <span>Search</span>
+                }
+              </button>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Filters */}
-        <div className="space-y-2 mb-6">
+      {/* ── Filters ── */}
+      <div className="bg-white border-b border-gray-100 shadow-card">
+        <div className="max-w-5xl mx-auto px-6 py-3 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 font-medium shrink-0">Doc type:</span>
-            {DOC_TYPES.map(t => (
-              <button key={t} onClick={() => handleFilterType(t)}
-                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
-                  filterType === t
-                    ? `${DOC_TYPE_COLORS[t] || 'bg-gray-100 text-gray-600'} border-transparent`
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
-                }`}>
-                {t}
-              </button>
-            ))}
+            <span className="text-xs text-gray-400 font-medium w-20 shrink-0">Doc type</span>
+            {DOC_TYPES.map(t => {
+              const s = TYPE_STYLES[t] || TYPE_STYLES.Other;
+              const active = filterType === t;
+              return (
+                <button key={t} onClick={() => handleFilterType(t)}
+                  className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all duration-200 btn-press ${
+                    active ? `${s.badge} shadow-sm scale-105` : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}>
+                  {active && <span className={`inline-block w-1.5 h-1.5 ${s.dot} rounded-full mr-1.5`} />}
+                  {t}
+                </button>
+              );
+            })}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 font-medium shrink-0">Language:</span>
+            <span className="text-xs text-gray-400 font-medium w-20 shrink-0">Language</span>
             {LANGUAGES.map(l => (
               <button key={l} onClick={() => handleFilterLang(l)}
-                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all duration-200 btn-press ${
                   filterLang === l
-                    ? 'bg-gray-800 text-white border-gray-800'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                    ? 'bg-slate-800 text-white border-slate-800 scale-105'
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }`}>
                 {l}
               </button>
             ))}
+            {(filterType || filterLang) && (
+              <button onClick={() => { setFilterType(''); setFilterLang(''); }}
+                className="text-xs text-sika-red hover:text-sika-red-dark underline font-medium transition-colors duration-200">
+                Clear
+              </button>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Active filter chips */}
-        {activeFilters.length > 0 && (
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs text-gray-400">Active:</span>
-            {activeFilters.map(f => (
-              <button key={f.label} onClick={f.clear}
-                className="text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-full hover:bg-red-100 flex items-center gap-1">
-                {f.label} <span className="text-red-400">×</span>
-              </button>
-            ))}
-            <button onClick={() => { setFilterType(''); setFilterLang(''); }}
-              className="text-xs text-gray-400 hover:text-gray-600 underline">
-              Clear all
-            </button>
-          </div>
-        )}
+      <div className="max-w-5xl mx-auto px-6 py-8">
 
-        {/* Results */}
+        {/* ── Results ── */}
         {searched && (
-          <div>
+          <div className="animate-slide-up">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="space-y-3 stagger">
+                {[1,2,3].map(i => <SkeletonCard key={i} />)}
               </div>
             ) : filtered.length > 0 ? (
-              <div>
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">
-                  {filtered.length} document{filtered.length !== 1 ? 's' : ''}
-                  {activeFilters.length > 0 ? ` matching filters` : ' found'}
-                </p>
-                <div className="space-y-2">
-                  {filtered.map(doc => (
-                    <div key={doc.slug} onClick={() => router.push(`/docs/${doc.slug}`)}
-                      className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-red-400 hover:shadow-sm transition-all group">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-0.5 rounded">{doc.productCode}</span>
-                            {doc.documentType && (
-                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${DOC_TYPE_COLORS[doc.documentType] || DOC_TYPE_COLORS.Other}`}>
-                                {doc.documentType}
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                    {(filterType || filterLang) ? ' · filtered' : ''}
+                  </p>
+                </div>
+                <div className="space-y-2.5 stagger">
+                  {filtered.map(doc => {
+                    const s = TYPE_STYLES[doc.documentType] || TYPE_STYLES.Other;
+                    return (
+                      <div key={doc.slug}
+                        onClick={() => router.push(`/docs/${doc.slug}`)}
+                        className="card-hover bg-white border border-gray-100 rounded-xl p-4 cursor-pointer shadow-card animate-slide-up group">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                              <span className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded font-medium">
+                                {doc.productCode}
                               </span>
-                            )}
-                            {doc.language && (
-                              <span className="text-xs px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-500">{doc.language}</span>
-                            )}
+                              {doc.documentType && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${s.badge}`}>
+                                  {doc.documentType}
+                                </span>
+                              )}
+                              {doc.language && (
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600 font-medium">
+                                  {doc.language}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-sm font-semibold text-gray-800 group-hover:text-sika-red transition-colors duration-200">
+                              {doc.productName}
+                            </h3>
+                            <p className="text-xs text-blue-400 font-mono mt-1 opacity-70 group-hover:opacity-100 transition-opacity duration-200">
+                              /docs/{doc.slug}/latest
+                            </p>
                           </div>
-                          <h3 className="text-sm font-medium text-gray-900 group-hover:text-red-700 transition-colors">{doc.productName}</h3>
-                          <p className="text-xs text-blue-500 font-mono mt-1">/docs/{doc.slug}/latest</p>
+                          <div className="text-right text-xs shrink-0">
+                            <div className="font-semibold text-gray-700 bg-gray-50 border border-gray-200 px-2 py-1 rounded-lg font-mono">
+                              v{doc.latestVersion}
+                            </div>
+                            <div className="text-gray-400 mt-1">{new Date(doc.updatedAt).toLocaleDateString()}</div>
+                          </div>
                         </div>
-                        <div className="text-right text-xs text-gray-400 shrink-0">
-                          <div className="font-medium text-gray-600">v{doc.latestVersion}</div>
-                          <div>{new Date(doc.updatedAt).toLocaleDateString()}</div>
+                        {/* hover arrow */}
+                        <div className="mt-2 flex items-center gap-1 text-xs text-sika-red font-medium opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-0 group-hover:translate-x-1">
+                          View document →
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
-              </div>
+              </>
             ) : (
-              <div className="text-center text-gray-400 text-sm py-12">
-                <p className="text-2xl mb-2">📄</p>
-                <p>No documents found{query ? ` for "${query}"` : ''}{activeFilters.length > 0 ? ' with selected filters' : ''}</p>
-                {activeFilters.length > 0 && (
+              <div className="text-center py-20 animate-fade-in">
+                <div className="text-5xl mb-4">🔍</div>
+                <p className="text-gray-700 font-semibold mb-1">No documents found</p>
+                <p className="text-sm text-gray-400">
+                  {query ? `No results for "${query}"` : 'No documents match the selected filters'}
+                </p>
+                {(filterType || filterLang) && (
                   <button onClick={() => { setFilterType(''); setFilterLang(''); }}
-                    className="mt-2 text-xs text-red-500 underline">Clear filters</button>
+                    className="mt-4 text-sm text-sika-red underline">Clear filters</button>
                 )}
               </div>
             )}
           </div>
         )}
 
-        {/* Info tiles — shown before first search */}
+        {/* ── Feature tiles ── */}
         {!searched && (
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            {[
-              { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance' },
-              { icon: '🔒', title: 'SHA-256 verified', desc: 'Every PDF has an integrity hash — tamper-proof' },
-              { icon: '📋', title: 'No login required', desc: 'Full public access, no account or registration' },
-            ].map(t => (
-              <div key={t.title} className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">{t.icon}</div>
-                <h3 className="text-xs font-semibold text-gray-700 mb-1">{t.title}</h3>
-                <p className="text-xs text-gray-400">{t.desc}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger">
+            {FEATURES.map(f => (
+              <div key={f.title}
+                className="card-hover bg-white border border-gray-100 rounded-xl p-5 text-center shadow-card">
+                <div className="text-3xl mb-3">{f.icon}</div>
+                <h3 className="text-xs font-semibold text-gray-800 mb-1">{f.title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
