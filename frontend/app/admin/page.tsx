@@ -105,12 +105,12 @@ export default function AdminPage() {
   const loadDashboard = useCallback(async () => {
     setDashboardLoading(true);
     try {
-      const [docsRes, auditRes, analyticsRes] = await Promise.all([
+      const [docsRes, auditRes, analyticsRes] = await Promise.allSettled([
         adminApi.listAll(), adminApi.getAudit(20), adminApi.getAnalytics(),
       ]);
-      setDashboardDocs(docsRes.data);
-      setAuditLogs(auditRes.data);
-      setAnalytics(analyticsRes.data);
+      if (docsRes.status === 'fulfilled') setDashboardDocs(docsRes.value.data);
+      if (auditRes.status === 'fulfilled') setAuditLogs(auditRes.value.data);
+      if (analyticsRes.status === 'fulfilled') setAnalytics(analyticsRes.value.data);
     } catch (e) { console.error(e); }
     finally { setDashboardLoading(false); }
   }, []);
