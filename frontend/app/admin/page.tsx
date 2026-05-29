@@ -357,7 +357,25 @@ export default function AdminPage() {
                   </div>
                   {auditLogs.length > 0 && (
                     <div className="bg-white border border-gray-200 rounded-lg p-4">
-                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Recent activity</h2>
+                      <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-gray-700">Recent activity</h2>
+                        <button
+                          onClick={() => {
+                            const header = 'Timestamp,Action,Slug,Version,Performed By,IP\n';
+                            const rows = auditLogs.map((l: any) =>
+                              [new Date(l.timestamp).toISOString(), l.action, l.slug, l.version || '', l.performedBy, l.ip || ''].join(',')
+                            ).join('\n');
+                            const blob = new Blob([header + rows], { type: 'text/csv' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0,10)}.csv`;
+                            a.click(); URL.revokeObjectURL(url);
+                          }}
+                          className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1.5 rounded hover:bg-gray-200 font-medium"
+                        >
+                          Export CSV
+                        </button>
+                      </div>
                       <div className="space-y-1">
                         {auditLogs.map((log: any, i: number) => (
                           <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0 gap-2">

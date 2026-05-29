@@ -45,6 +45,7 @@ router.get('/', async (req, res) => {
       productName: d.productName,
       latestVersion: d.versions[d.latestVersionIndex]?.versionNumber,
       documentType: d.versions[d.latestVersionIndex]?.publicMetadata?.documentType,
+      language: d.versions[d.latestVersionIndex]?.publicMetadata?.language,
       updatedAt: d.updatedAt,
       dynamicUrl: `${process.env.BASE_URL}/docs/${d.slug}/latest`,
     })));
