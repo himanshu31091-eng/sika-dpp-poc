@@ -5,7 +5,7 @@ import { adminApi } from '@/lib/api';
 
 const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical', 'Other'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT', 'Other'];
-type Mode = 'dashboard' | 'new' | 'version' | 'list';
+type Mode = 'dashboard' | 'new' | 'version' | 'list' | 'edms';
 
 interface DocItem {
   slug: string; productCode: string; productName: string;
@@ -27,6 +27,22 @@ export default function AdminPage() {
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<{ totalViews: number; totalDownloads: number; byDocument: any[] } | null>(null);
+  const [edmsResult, setEdmsResult] = useState<any>(null);
+  const [edmsLoading, setEdmsLoading] = useState(false);
+  const [edmsFile, setEdmsFile] = useState<File | null>(null);
+  const edmsFileRef = useRef<HTMLInputElement>(null);
+  const edmsFormRef = useRef({
+    edmsDocId: 'EDMS-2026-001',
+    edmsVersionId: 'v1',
+    slug: 'sikadur-32--tds-en',
+    productCode: 'Sikadur-32',
+    productName: 'Sikadur-32 Normal Epoxy Adhesive',
+    versionNumber: '1.0',
+    documentType: 'TDS',
+    language: 'EN',
+    productCategory: 'Concrete',
+    title: 'Technical Data Sheet -- Sikadur-32',
+  });
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -90,6 +106,48 @@ export default function AdminPage() {
 
   useEffect(() => { if (mode === 'list') loadDocs(); }, [mode, loadDocs]);
   useEffect(() => { if (mode === 'dashboard') loadDashboard(); }, [mode, loadDashboard]);
+
+  const handleEdmsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!edmsFile) return alert('Please select a PDF file');
+    setEdmsLoading(true);
+    setEdmsResult(null);
+    try {
+      const f = edmsFormRef.current;
+      // Step 1 — simulate EDMS push signal
+      const { data: pushData } = await adminApi.edmsPush({
+        edmsDocId: f.edmsDocId,
+        edmsVersionId: f.edmsVersionId,
+        slug: f.slug,
+        productCode: f.productCode,
+        productName: f.productName,
+        versionNumber: f.versionNumber,
+        documentType: f.documentType,
+        language: f.language,
+        title: f.title,
+      });
+
+      // Step 2 — upload file via the action the push returned
+      const fd = new FormData();
+      Object.entries(f).forEach(([k, v]) => fd.append(k, v));
+      fd.append('file', edmsFile);
+
+      const { data: uploadData } = pushData.action === 'create_pending'
+        ? await adminApi.upload(fd)
+        : await adminApi.addVersion(f.slug, fd);
+
+      // Step 3 — auto-publish
+      await adminApi.publish(f.slug);
+
+      setEdmsResult({ success: true, push: pushData, upload: uploadData });
+      setEdmsFile(null);
+      if (edmsFileRef.current) edmsFileRef.current.value = '';
+    } catch (err: any) {
+      setEdmsResult({ error: err.response?.data?.error || err.message });
+    } finally {
+      setEdmsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,10 +244,10 @@ export default function AdminPage() {
 
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6 w-fit gap-1">
-          {(currentUser === 'himanshu' ? ['dashboard', 'new', 'version', 'list'] : ['new', 'version', 'list'] as Mode[]).map(k => (
+          {(currentUser === 'himanshu' ? ['dashboard', 'new', 'version', 'list', 'edms'] : ['new', 'version', 'list'] as Mode[]).map(k => (
             <button key={k} onClick={() => setMode(k as Mode)}
               className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${mode === k ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              {k === 'dashboard' ? 'Dashboard' : k === 'new' ? 'New document' : k === 'version' ? 'Add version' : 'All documents'}
+              {k === 'dashboard' ? 'Dashboard' : k === 'new' ? 'New document' : k === 'version' ? 'Add version' : k === 'list' ? 'All documents' : 'EDMS Demo'}
             </button>
           ))}
         </div>
@@ -326,6 +384,132 @@ export default function AdminPage() {
             </div>
           );
         })()}
+
+        {mode === 'edms' && (
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm font-semibold text-blue-800 mb-1">EDMS Integration Demo</p>
+              <p className="text-xs text-blue-600">
+                Simulates Optimal Systems (yuuvis-rad) pushing an approved document to the public repository.
+                The flow runs 3 steps automatically: <strong>Push signal → File upload → Auto-publish</strong>.
+              </p>
+            </div>
+
+            <form onSubmit={handleEdmsSubmit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Step 1 — EDMS document identity</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">EDMS Doc ID</label>
+                  <input type="text" defaultValue={edmsFormRef.current.edmsDocId}
+                    onChange={e => { edmsFormRef.current.edmsDocId = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">EDMS Version ID</label>
+                  <input type="text" defaultValue={edmsFormRef.current.edmsVersionId}
+                    onChange={e => { edmsFormRef.current.edmsVersionId = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+              </div>
+
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide pt-2">Step 2 — Product metadata</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Slug</label>
+                  <input type="text" defaultValue={edmsFormRef.current.slug}
+                    onChange={e => { edmsFormRef.current.slug = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Product Code</label>
+                  <input type="text" defaultValue={edmsFormRef.current.productCode}
+                    onChange={e => { edmsFormRef.current.productCode = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Product Name</label>
+                <input type="text" defaultValue={edmsFormRef.current.productName}
+                  onChange={e => { edmsFormRef.current.productName = e.target.value; }}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Version</label>
+                  <input type="text" defaultValue={edmsFormRef.current.versionNumber}
+                    onChange={e => { edmsFormRef.current.versionNumber = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Doc Type</label>
+                  <select defaultValue={edmsFormRef.current.documentType}
+                    onChange={e => { edmsFormRef.current.documentType = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    {['DoPC','SDS','TDS','Label','Technical','Other'].map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Language</label>
+                  <select defaultValue={edmsFormRef.current.language}
+                    onChange={e => { edmsFormRef.current.language = e.target.value; }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    {['EN','DE','FR','IT','ES','NL','PL','PT','Other'].map(l => <option key={l}>{l}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide pt-2">Step 3 — PDF file</p>
+              <div
+                onClick={() => edmsFileRef.current?.click()}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f?.type === 'application/pdf') setEdmsFile(f); }}
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${edmsFile ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-blue-400'}`}>
+                {edmsFile
+                  ? <p className="text-sm text-green-700 font-medium">{edmsFile.name} ({(edmsFile.size/1024/1024).toFixed(2)} MB)</p>
+                  : <p className="text-sm text-gray-400">Click or drag a PDF — simulates the file Optimal Systems would provide</p>
+                }
+                <input ref={edmsFileRef} type="file" accept="application/pdf" className="hidden"
+                  onChange={e => setEdmsFile(e.target.files?.[0] || null)} />
+              </div>
+
+              <button type="submit" disabled={edmsLoading}
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {edmsLoading ? 'Running EDMS flow...' : 'Simulate EDMS Push → Upload → Publish'}
+              </button>
+            </form>
+
+            {edmsResult && (
+              <div className={`p-4 rounded-lg border ${edmsResult.error ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                {edmsResult.error ? (
+                  <p className="text-red-700 text-sm">{edmsResult.error}</p>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-green-700 text-sm font-semibold">All 3 steps completed successfully</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      {['Push signal', 'File upload', 'Published'].map((step, i) => (
+                        <div key={i} className="bg-white rounded border border-green-200 p-2 text-center">
+                          <span className="text-green-600 font-medium">✓ {step}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {edmsResult.upload?.dynamicUrl && (
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Public URL (dynamic)</p>
+                        <code className="text-xs text-blue-600 break-all">{edmsResult.upload.dynamicUrl}</code>
+                      </div>
+                    )}
+                    {edmsResult.upload?.fileHash && (
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">SHA-256 integrity hash</p>
+                        <code className="text-xs text-gray-600 break-all">{edmsResult.upload.fileHash}</code>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {(mode === 'new' || mode === 'version') && (
           <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">

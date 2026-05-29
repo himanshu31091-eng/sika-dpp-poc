@@ -42,4 +42,6 @@ export const adminApi = {
     API.get(`/admin/audit?limit=${limit}`, { headers: adminHeaders() }),
   getAnalytics: () =>
     API.get('/admin/analytics', { headers: adminHeaders() }),
+  edmsPush: (payload: object) =>
+    API.post('/edms/push', payload, { headers: adminHeaders() }),
 };

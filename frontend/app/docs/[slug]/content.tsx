@@ -8,6 +8,7 @@ interface VersionMeta {
   versionTag: string;
   fileName: string;
   fileSize: number;
+  fileHash?: string;
   uploadedAt: string;
   title?: string;
   language?: string;
@@ -97,6 +98,8 @@ function DocContent() {
         ]);
         setDoc(docRes.data);
         setVersions(versRes.data.versions || []);
+        const v = docRes.data.currentVersion || docRes.data.version;
+        publicApi.trackView(slug, v?.versionNumber);
       } catch (e: any) {
         setError(e?.response?.data?.error || 'Document not found');
       } finally {
@@ -198,6 +201,21 @@ function DocContent() {
                   <div><span className="text-gray-400">Size: </span><span className="text-gray-700">{formatBytes(version.fileSize)}</span></div>
                 </div>
               </div>
+              {version.fileHash && (
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">File Integrity</p>
+                    <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">SHA-256</span>
+                  </div>
+                  <div className="bg-gray-50 rounded px-2 py-1.5 flex items-center justify-between gap-2">
+                    <code className="text-xs text-gray-600 truncate">{version.fileHash.slice(0, 20)}…</code>
+                    <button onClick={() => copy(version.fileHash!, 'hash')} className="text-xs text-gray-400 shrink-0">
+                      {copied === 'hash' ? '✓' : 'copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Stable links</p>
                 <div className="space-y-2">
@@ -254,6 +272,26 @@ function DocContent() {
                   <div><dt className="text-xs text-gray-400">Uploaded</dt><dd className="text-xs text-gray-700">{new Date(version.uploadedAt).toLocaleDateString()}</dd></div>
                 </dl>
               </div>
+
+              {version.fileHash && (
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">File Integrity</span>
+                    <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">SHA-256</span>
+                  </div>
+                  <div className="bg-gray-50 rounded px-2 py-2 mb-2">
+                    <code className="text-xs text-gray-600 break-all leading-relaxed">{version.fileHash}</code>
+                  </div>
+                  <button
+                    onClick={() => copy(version.fileHash!, 'hash')}
+                    className="w-full text-xs text-gray-400 hover:text-gray-600 border border-gray-200 rounded py-1 hover:bg-gray-50 transition-colors">
+                    {copied === 'hash' ? '✓ Copied' : 'Copy hash'}
+                  </button>
+                  <p className="text-xs text-gray-300 mt-2 leading-relaxed">
+                    Verify the downloaded file matches this checksum to confirm authenticity.
+                  </p>
+                </div>
+              )}
 
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Stable links</p>
