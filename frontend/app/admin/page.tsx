@@ -5,7 +5,7 @@ import { adminApi } from '@/lib/api';
 
 const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical', 'Other'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT', 'Other'];
-type Mode = 'new' | 'version' | 'list';
+type Mode = 'dashboard' | 'new' | 'version' | 'list';
 
 interface DocItem {
   slug: string; productCode: string; productName: string;
@@ -23,6 +23,8 @@ export default function AdminPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [currentUser, setCurrentUser] = useState('');
   const [mode, setMode] = useState<Mode>('new');
+  const [dashboardDocs, setDashboardDocs] = useState<DocItem[]>([]);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -52,6 +54,7 @@ export default function AdminPage() {
     } else {
       setCurrentUser(user);
       setAuthChecked(true);
+      if (user === 'himanshu') setMode('dashboard');
     }
   }, [router]);
 
@@ -68,7 +71,15 @@ export default function AdminPage() {
     finally { setDocsLoading(false); }
   }, []);
 
+  const loadDashboard = useCallback(async () => {
+    setDashboardLoading(true);
+    try { const { data } = await adminApi.listAll(); setDashboardDocs(data); }
+    catch (e) { console.error(e); }
+    finally { setDashboardLoading(false); }
+  }, []);
+
   useEffect(() => { if (mode === 'list') loadDocs(); }, [mode, loadDocs]);
+  useEffect(() => { if (mode === 'dashboard') loadDashboard(); }, [mode, loadDashboard]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,13 +176,91 @@ export default function AdminPage() {
 
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6 w-fit gap-1">
-          {(['new', 'version', 'list'] as Mode[]).map(k => (
-            <button key={k} onClick={() => setMode(k)}
+          {(currentUser === 'himanshu' ? ['dashboard', 'new', 'version', 'list'] : ['new', 'version', 'list'] as Mode[]).map(k => (
+            <button key={k} onClick={() => setMode(k as Mode)}
               className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors ${mode === k ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              {k === 'new' ? 'New document' : k === 'version' ? 'Add version' : 'All documents'}
+              {k === 'dashboard' ? 'Dashboard' : k === 'new' ? 'New document' : k === 'version' ? 'Add version' : 'All documents'}
             </button>
           ))}
         </div>
+
+        {mode === 'dashboard' && (() => {
+          const total = dashboardDocs.length;
+          const published = dashboardDocs.filter(d => d.status === 'published').length;
+          const drafts = dashboardDocs.filter(d => d.status === 'draft');
+          const archived = dashboardDocs.filter(d => d.status === 'archived').length;
+          const recent = [...dashboardDocs].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5);
+          return (
+            <div className="space-y-6">
+              {dashboardLoading ? (
+                <p className="text-center text-gray-400 text-sm py-12">Loading...</p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    {[
+                      { label: 'Total', value: total, color: 'bg-blue-50 text-blue-700 border-blue-200' },
+                      { label: 'Published', value: published, color: 'bg-green-50 text-green-700 border-green-200' },
+                      { label: 'Drafts', value: drafts.length, color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+                      { label: 'Archived', value: archived, color: 'bg-gray-50 text-gray-500 border-gray-200' },
+                    ].map(card => (
+                      <div key={card.label} className={`rounded-lg border p-4 ${card.color}`}>
+                        <p className="text-xs font-medium uppercase tracking-wide opacity-70">{card.label}</p>
+                        <p className="text-3xl font-bold mt-1">{card.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {drafts.length > 0 && (
+                    <div className="bg-white border border-yellow-200 rounded-lg p-4">
+                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Drafts pending publish ({drafts.length})</h2>
+                      <div className="space-y-2">
+                        {drafts.map(doc => (
+                          <div key={doc.slug} className="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">{doc.productName}</p>
+                              <p className="text-xs text-gray-400">{doc.productCode} · {doc.versions?.length} version(s)</p>
+                            </div>
+                            <button
+                              onClick={async () => { try { await adminApi.publish(doc.slug); loadDashboard(); } catch { alert('Failed'); } }}
+                              className="text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 font-medium shrink-0"
+                            >
+                              Publish
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-sm font-semibold text-gray-700">Recently updated</h2>
+                      <button onClick={loadDashboard} className="text-xs text-gray-400 hover:text-gray-600 underline">Refresh</button>
+                    </div>
+                    {recent.length === 0 ? (
+                      <p className="text-sm text-gray-400 py-4 text-center">No documents yet</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {recent.map(doc => (
+                          <div key={doc.slug} className="flex items-center justify-between gap-4 py-2 border-b border-gray-100 last:border-0">
+                            <div>
+                              <p className="text-sm font-medium text-gray-800">{doc.productName}</p>
+                              <p className="text-xs text-gray-400">{doc.productCode}</p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${SC[doc.status] || SC.draft}`}>{doc.status}</span>
+                              <span className="text-xs text-gray-300">{new Date(doc.updatedAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
 
         {(mode === 'new' || mode === 'version') && (
           <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
