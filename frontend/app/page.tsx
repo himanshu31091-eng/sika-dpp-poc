@@ -122,7 +122,7 @@ export default function HomePage() {
         {/* red glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-sika-red rounded-full opacity-[0.08] blur-[80px]" />
 
-        <div className="relative max-w-5xl mx-auto px-6 py-20 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white/70 text-xs px-3 py-1.5 rounded-full mb-6 animate-fade-in">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
             Public repository · No login required
@@ -166,7 +166,7 @@ export default function HomePage() {
 
       {/* ── Filters ── */}
       <div className="bg-white border-b border-gray-100 shadow-card">
-        <div className="max-w-5xl mx-auto px-6 py-3 space-y-2">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-gray-400 font-medium w-20 shrink-0">Doc type</span>
             {DOC_TYPES.map(t => {
@@ -205,7 +205,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
         {/* ── Results ── */}
         {searched && (
@@ -287,7 +287,7 @@ export default function HomePage() {
 
         {/* ── Feature tiles ── */}
         {!searched && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger mt-6">
             {FEATURES.map(f => (
               <div key={f.title}
                 className="card-hover bg-white border border-gray-100 rounded-xl p-5 text-center shadow-card">
