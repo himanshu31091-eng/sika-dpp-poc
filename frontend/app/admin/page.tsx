@@ -86,7 +86,7 @@ export default function AdminPage() {
     const auth = localStorage.getItem('admin_auth');
     const user = localStorage.getItem('admin_user') || '';
     if (!auth) { router.replace('/admin/login'); }
-    else { setCurrentUser(user); setAuthChecked(true); if (user === 'himanshu') setMode('dashboard'); }
+    else { setCurrentUser(user); setAuthChecked(true); setMode('dashboard'); }
   }, [router]);
 
   const handleLogout = () => {
@@ -249,7 +249,7 @@ export default function AdminPage() {
 
         {/* ── Tab bar ── */}
         <div className="flex bg-gray-100 dark:bg-gray-800/80 rounded-xl p-1 mb-8 gap-0.5 overflow-x-auto w-full sm:w-fit">
-          {(currentUser === 'himanshu' ? ['dashboard', 'new', 'version', 'list', 'edms'] : ['new', 'version', 'list'] as Mode[]).map(k => (
+          {(['dashboard', 'new', 'version', 'list', 'edms'] as Mode[]).map(k => (
             <button key={k} onClick={() => setMode(k as Mode)}
               className={`px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 btn-press whitespace-nowrap ${
                 mode === k
