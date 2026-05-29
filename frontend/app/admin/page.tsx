@@ -25,6 +25,8 @@ export default function AdminPage() {
   const [mode, setMode] = useState<Mode>('new');
   const [dashboardDocs, setDashboardDocs] = useState<DocItem[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<{ totalViews: number; totalDownloads: number; byDocument: any[] } | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -73,8 +75,16 @@ export default function AdminPage() {
 
   const loadDashboard = useCallback(async () => {
     setDashboardLoading(true);
-    try { const { data } = await adminApi.listAll(); setDashboardDocs(data); }
-    catch (e) { console.error(e); }
+    try {
+      const [docsRes, auditRes, analyticsRes] = await Promise.all([
+        adminApi.listAll(),
+        adminApi.getAudit(20),
+        adminApi.getAnalytics(),
+      ]);
+      setDashboardDocs(docsRes.data);
+      setAuditLogs(auditRes.data);
+      setAnalytics(analyticsRes.data);
+    } catch (e) { console.error(e); }
     finally { setDashboardLoading(false); }
   }, []);
 
@@ -210,6 +220,20 @@ export default function AdminPage() {
                     ))}
                   </div>
 
+                  {analytics && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'Total views', value: analytics.totalViews, color: 'bg-purple-50 text-purple-700 border-purple-200' },
+                        { label: 'Total downloads', value: analytics.totalDownloads, color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                      ].map(card => (
+                        <div key={card.label} className={`rounded-lg border p-4 ${card.color}`}>
+                          <p className="text-xs font-medium uppercase tracking-wide opacity-70">{card.label}</p>
+                          <p className="text-3xl font-bold mt-1">{card.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {drafts.length > 0 && (
                     <div className="bg-white border border-yellow-200 rounded-lg p-4">
                       <h2 className="text-sm font-semibold text-gray-700 mb-3">Drafts pending publish ({drafts.length})</h2>
@@ -226,6 +250,23 @@ export default function AdminPage() {
                             >
                               Publish
                             </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {analytics && analytics.byDocument.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Top documents by activity</h2>
+                      <div className="space-y-2">
+                        {analytics.byDocument.slice(0, 5).map((item: any) => (
+                          <div key={item.slug} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
+                            <p className="text-sm text-gray-700 truncate flex-1 mr-4">{item.slug}</p>
+                            <div className="flex gap-3 shrink-0 text-xs">
+                              <span className="text-purple-600">{item.views} views</span>
+                              <span className="text-indigo-600">{item.downloads} dl</span>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -256,6 +297,30 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                  {auditLogs.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h2 className="text-sm font-semibold text-gray-700 mb-3">Recent activity</h2>
+                      <div className="space-y-1">
+                        {auditLogs.map((log: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0 gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${
+                                log.action === 'publish' ? 'bg-green-100 text-green-700' :
+                                log.action === 'archive' ? 'bg-gray-100 text-gray-500' :
+                                log.action === 'create' ? 'bg-blue-100 text-blue-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }`}>{log.action}</span>
+                              <span className="text-xs text-gray-600 truncate">{log.slug}{log.version ? ` v${log.version}` : ''}</span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 text-xs text-gray-400">
+                              <span>{log.performedBy}</span>
+                              <span>{new Date(log.timestamp).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>

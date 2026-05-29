@@ -6,6 +6,7 @@ const VersionSchema = new mongoose.Schema({
   fileKey: { type: String, required: true },
   fileName: { type: String, required: true },
   fileSize: { type: Number },
+  fileHash: { type: String },
   mimeType: { type: String, default: 'application/pdf' },
   publicMetadata: {
     title: String,

@@ -1,8 +1,8 @@
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const crypto = require('crypto');
 
 // Initialise S3 client (eu-central-1, Frankfurt for EU data residency)
 const s3 = new S3Client({
@@ -15,27 +15,10 @@ const s3 = new S3Client({
 
 const S3_BUCKET = process.env.S3_BUCKET;
 
-// Multer storage configured to upload directly to S3
+// Memory storage — buffer needed for SHA-256 hashing and PDF metadata stripping
 const upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: S3_BUCKET,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    // Each file gets a unique key under documents/<slug>/<uuid>.pdf
-    key: (req, file, cb) => {
-      const slug = req.body.slug || req.params.slug || 'unknown';
-      const ext = path.extname(file.originalname) || '.pdf';
-      const key = `documents/${slug}/${uuidv4()}${ext}`;
-      cb(null, key);
-    },
-    metadata: (req, file, cb) => {
-      cb(null, {
-        originalName: file.originalname,
-        uploadedAt: new Date().toISOString(),
-      });
-    },
-  }),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
@@ -45,4 +28,26 @@ const upload = multer({
   },
 });
 
-module.exports = { s3, upload, S3_BUCKET };
+// Upload a buffer to S3 and return the object key
+async function uploadBufferToS3(buffer, slug, originalName) {
+  const ext = path.extname(originalName) || '.pdf';
+  const key = `documents/${slug}/${uuidv4()}${ext}`;
+  await s3.send(new PutObjectCommand({
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: buffer,
+    ContentType: 'application/pdf',
+    Metadata: {
+      originalName,
+      uploadedAt: new Date().toISOString(),
+    },
+  }));
+  return key;
+}
+
+// SHA-256 hex digest of a buffer
+function sha256(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+module.exports = { s3, upload, S3_BUCKET, uploadBufferToS3, sha256 };

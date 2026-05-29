@@ -1,10 +1,34 @@
 const express = require('express');
 const router = express.Router();
+const { PDFDocument } = require('pdf-lib');
 const Document = require('../models/Document');
-const { upload } = require('../config/storage');
+const AuditLog = require('../models/AuditLog');
+const Analytics = require('../models/Analytics');
+const { upload, uploadBufferToS3, sha256 } = require('../config/storage');
 const { adminAuth } = require('../middleware/auth');
 
 router.use(adminAuth);
+
+// Strip internal PDF metadata fields before storing
+async function stripPdfMetadata(buffer) {
+  try {
+    const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+    pdfDoc.setTitle('');
+    pdfDoc.setAuthor('');
+    pdfDoc.setSubject('');
+    pdfDoc.setKeywords([]);
+    pdfDoc.setProducer('');
+    pdfDoc.setCreator('');
+    return Buffer.from(await pdfDoc.save());
+  } catch {
+    // If stripping fails (e.g. corrupted PDF), return original buffer
+    return buffer;
+  }
+}
+
+function getPerformedBy(req) {
+  return req.headers['x-admin-user'] || req.body.uploadedBy || 'unknown';
+}
 
 // POST /admin/documents — create new document with first version
 router.post('/documents', upload.single('file'), async (req, res) => {
@@ -14,7 +38,7 @@ router.post('/documents', upload.single('file'), async (req, res) => {
       versionNumber = '1.0',
       title, language, productCategory,
       documentType = 'Other', issueDate,
-      edmsDocId, edmsVersionId, uploadedBy = 'admin',
+      edmsDocId, edmsVersionId,
       status = 'draft',
     } = req.body;
 
@@ -32,8 +56,10 @@ router.post('/documents', upload.single('file'), async (req, res) => {
       });
     }
 
-    // multer-s3 puts the S3 object key on req.file.key
-    const fileKey = req.file.key;
+    const strippedBuffer = await stripPdfMetadata(req.file.buffer);
+    const fileHash = sha256(strippedBuffer);
+    const fileKey = await uploadBufferToS3(strippedBuffer, slug, req.file.originalname);
+    const performedBy = getPerformedBy(req);
 
     const doc = new Document({
       slug, productCode, productName, status,
@@ -42,18 +68,21 @@ router.post('/documents', upload.single('file'), async (req, res) => {
         versionTag: `v${versionNumber.split('.')[0]}`,
         fileKey,
         fileName: req.file.originalname,
-        fileSize: req.file.size,
+        fileSize: strippedBuffer.length,
+        fileHash,
         publicMetadata: { title, language, productCategory, documentType, issueDate },
-        internalMetadata: { uploadedBy, edmsDocId, edmsVersionId, sourceSystem: 'manual' },
+        internalMetadata: { uploadedBy: performedBy, edmsDocId, edmsVersionId, sourceSystem: 'manual' },
       }],
       latestVersionIndex: 0,
     });
 
     await doc.save();
+    await AuditLog.create({ action: 'create', slug, version: versionNumber, performedBy, ip: req.ip });
 
     res.status(201).json({
       message: 'Document created',
       slug: doc.slug,
+      fileHash,
       dynamicUrl: `${process.env.BASE_URL}/docs/${doc.slug}/latest`,
       versionUrl: `${process.env.BASE_URL}/docs/${doc.slug}/v/${versionNumber}`,
     });
@@ -73,7 +102,6 @@ router.patch('/documents/:slug/versions', upload.single('file'), async (req, res
     const {
       versionNumber, title, language, productCategory,
       documentType, issueDate, edmsDocId, edmsVersionId,
-      uploadedBy = 'admin',
     } = req.body;
 
     if (!versionNumber) return res.status(400).json({ error: 'versionNumber required' });
@@ -81,27 +109,32 @@ router.patch('/documents/:slug/versions', upload.single('file'), async (req, res
     const exists = doc.versions.find(v => v.versionNumber === versionNumber);
     if (exists) return res.status(409).json({ error: `Version ${versionNumber} already exists` });
 
-    doc.versions[doc.latestVersionIndex].supersededAt = new Date();
+    const strippedBuffer = await stripPdfMetadata(req.file.buffer);
+    const fileHash = sha256(strippedBuffer);
+    const fileKey = await uploadBufferToS3(strippedBuffer, req.params.slug, req.file.originalname);
+    const performedBy = getPerformedBy(req);
 
-    // multer-s3 puts the S3 object key on req.file.key
-    const fileKey = req.file.key;
+    doc.versions[doc.latestVersionIndex].supersededAt = new Date();
 
     doc.versions.push({
       versionNumber,
       versionTag: `v${versionNumber.split('.')[0]}`,
       fileKey,
       fileName: req.file.originalname,
-      fileSize: req.file.size,
+      fileSize: strippedBuffer.length,
+      fileHash,
       publicMetadata: { title, language, productCategory, documentType, issueDate },
-      internalMetadata: { uploadedBy, edmsDocId, edmsVersionId, sourceSystem: 'manual' },
+      internalMetadata: { uploadedBy: performedBy, edmsDocId, edmsVersionId, sourceSystem: 'manual' },
     });
 
     doc.latestVersionIndex = doc.versions.length - 1;
     doc.updatedAt = new Date();
     await doc.save();
+    await AuditLog.create({ action: 'add_version', slug: req.params.slug, version: versionNumber, performedBy, ip: req.ip });
 
     res.json({
       message: `Version ${versionNumber} added`,
+      fileHash,
       dynamicUrl: `${process.env.BASE_URL}/docs/${doc.slug}/latest`,
       versionUrl: `${process.env.BASE_URL}/docs/${doc.slug}/v/${versionNumber}`,
     });
@@ -119,6 +152,7 @@ router.patch('/documents/:slug/publish', async (req, res) => {
       { new: true }
     );
     if (!doc) return res.status(404).json({ error: 'Not found' });
+    await AuditLog.create({ action: 'publish', slug: req.params.slug, performedBy: getPerformedBy(req), ip: req.ip });
     res.json({ message: 'Published', status: doc.status });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -134,6 +168,7 @@ router.patch('/documents/:slug/archive', async (req, res) => {
       { new: true }
     );
     if (!doc) return res.status(404).json({ error: 'Not found' });
+    await AuditLog.create({ action: 'archive', slug: req.params.slug, performedBy: getPerformedBy(req), ip: req.ip });
     res.json({ message: 'Archived', status: doc.status });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -156,6 +191,50 @@ router.get('/documents/:slug', async (req, res) => {
     const doc = await Document.findOne({ slug: req.params.slug });
     if (!doc) return res.status(404).json({ error: 'Not found' });
     res.json(doc);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /admin/audit — recent audit log entries
+router.get('/audit', async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const logs = await AuditLog.find({}).sort({ timestamp: -1 }).limit(limit);
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /admin/analytics — view + download counts per document
+router.get('/analytics', async (req, res) => {
+  try {
+    const [views, downloads] = await Promise.all([
+      Analytics.aggregate([
+        { $match: { event: 'view' } },
+        { $group: { _id: '$slug', count: { $sum: 1 } } },
+      ]),
+      Analytics.aggregate([
+        { $match: { event: 'download' } },
+        { $group: { _id: '$slug', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const viewMap = Object.fromEntries(views.map(v => [v._id, v.count]));
+    const dlMap = Object.fromEntries(downloads.map(d => [d._id, d.count]));
+
+    const slugs = [...new Set([...Object.keys(viewMap), ...Object.keys(dlMap)])];
+    const result = slugs.map(slug => ({
+      slug,
+      views: viewMap[slug] || 0,
+      downloads: dlMap[slug] || 0,
+    })).sort((a, b) => (b.views + b.downloads) - (a.views + a.downloads));
+
+    const totalViews = views.reduce((s, v) => s + v.count, 0);
+    const totalDownloads = downloads.reduce((s, d) => s + d.count, 0);
+
+    res.json({ totalViews, totalDownloads, byDocument: result });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -11,7 +11,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'x-api-key'],
+  allowedHeaders: ['Content-Type', 'x-api-key', 'x-admin-user'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
