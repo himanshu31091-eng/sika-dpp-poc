@@ -149,7 +149,8 @@ export default function AdminPage() {
   const handlePublish = async (slug: string) => { try { await adminApi.publish(slug); loadDocs(); } catch { alert('Failed'); } };
   const handleArchive = async (slug: string) => {
     if (!confirm('Archive ' + slug + '?')) return;
-    try { await adminApi.archive(slug); loadDocs(); } catch { alert('Failed'); }
+    try { await adminApi.archive(slug); loadDocs(); }
+    catch (err: any) { alert(err.response?.data?.error || 'Archive failed — please try again'); }
   };
 
   const handleEdmsSubmit = async (e: React.FormEvent) => {

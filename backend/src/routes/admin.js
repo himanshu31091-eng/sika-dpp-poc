@@ -1,3 +1,4 @@
+// Admin routes — no role restrictions, API key auth only
 const express = require('express');
 const router = express.Router();
 const { PDFDocument } = require('pdf-lib');
