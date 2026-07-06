@@ -4,69 +4,72 @@ interface Props {
   showGroup?: boolean;
 }
 
+/**
+ * Sika logo: red upward triangle, yellow "Sika" italic script inside,
+ * red ® outside to the right. Transparent background.
+ * Proportions match the official Sika brand mark.
+ * Font: Lobster (Google Fonts) — closest freely available match
+ *       to Sika's proprietary script wordmark.
+ */
 export function SikaLogo({ size = 44, className = '', showGroup = false }: Props) {
+  // viewBox 160 × 130 — triangle occupies left ~82%, ® occupies remaining right
   return (
     <div
       className={`inline-flex flex-col items-center ${className}`}
       role="img"
       aria-label="Sika"
     >
-      {/* Yellow square → red triangle → Sika italic text inside */}
       <svg
         width={size}
-        height={size}
-        viewBox="0 0 120 120"
+        height={Math.round(size * 0.81)}   /* 130/160 aspect ratio */
+        viewBox="0 0 160 130"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Sika yellow background */}
-        <rect width="120" height="120" fill="#ffc510" />
+        {/* Red triangle — apex top-centre, base at bottom */}
+        <polygon points="66,5 129,124 3,124" fill="#C8102E" />
 
-        {/* Sika red triangle (pointing up) */}
-        <polygon points="60,11 113,105 7,105" fill="#C8102E" />
-
-        {/* "Sika" wordmark — bold italic serif, white, inside triangle */}
+        {/* "Sika" — yellow, Lobster italic script, centred inside triangle */}
         <text
-          x="60"
-          y="81"
+          x="66"
+          y="96"
           textAnchor="middle"
-          fill="white"
-          fontFamily="Georgia, 'Palatino Linotype', 'Book Antiqua', Palatino, serif"
+          fill="#ffc510"
+          fontFamily="'Lobster', 'Brush Script MT', cursive"
+          fontSize="42"
           fontStyle="italic"
-          fontWeight="bold"
-          fontSize="29"
-          letterSpacing="1"
         >
           Sika
         </text>
 
-        {/* Registered trademark ® */}
+        {/* ® — red, small, positioned outside triangle to the right */}
         <text
-          x="88"
-          y="38"
-          fill="white"
+          x="137"
+          y="72"
+          fill="#C8102E"
           fontFamily="Arial, Helvetica, sans-serif"
-          fontSize="10"
+          fontSize="16"
           fontWeight="normal"
         >
           ®
         </text>
       </svg>
 
-      {/* Optional "GROUP" label below */}
+      {/* Optional "GROUP" label below the mark */}
       {showGroup && (
         <span
           style={{
             fontFamily: '"Barlow", Arial, sans-serif',
             fontWeight: 500,
-            fontSize: Math.round(size * 0.19),
+            fontSize: Math.round(size * 0.16),
             color: '#616161',
-            letterSpacing: Math.round(size * 0.06),
-            paddingLeft: Math.round(size * 0.06),
-            marginTop: 3,
+            letterSpacing: Math.round(size * 0.05),
+            paddingLeft: Math.round(size * 0.05),
+            marginTop: 4,
+            textTransform: 'uppercase' as const,
           }}
         >
-          GROUP
+          Group
         </span>
       )}
     </div>
