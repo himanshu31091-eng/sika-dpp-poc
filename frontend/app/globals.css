@@ -3,8 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --sika-red: #C8102E;
-  --sika-red-dark: #A00D24;
+  /* ── Sika Brand Colors (from sika.com CSS) ── */
+  --sika-red:         #C8102E;   /* Pantone 186 — logo / primary brand */
+  --sika-red-dark:    #A00D24;
+  --sika-red-ui:      #ff3939;   /* --alert in sika.com CSS */
+  --sika-yellow:      #ffc510;   /* --primary in sika.com CSS */
+  --sika-yellow-dark: #e6ae00;
+  --sika-blue:        #3982b1;   /* --secondary in sika.com CSS */
+  --sika-green:       #52a398;   /* --success in sika.com CSS */
+  --sika-dark-grey:   #616161;   /* --sika-dark-grey */
+  --sika-grey:        #e0e0e0;
+  --sika-light-grey:  #f5f5f5;
 }
 
 * { box-sizing: border-box; }
@@ -12,7 +21,8 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Barlow = closest freely available match to Sika's proprietary Klavika typeface */
+  font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

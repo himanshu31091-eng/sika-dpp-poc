@@ -9,13 +9,24 @@ module.exports = {
     extend: {
       colors: {
         sika: {
-          red:        '#C8102E',
-          'red-dark': '#A00D24',
-          'red-light':'#E8314F',
+          /* ── From sika.com CSS variables ── */
+          red:          '#C8102E',   /* Pantone 186 — logo */
+          'red-dark':   '#A00D24',
+          'red-light':  '#E8314F',
+          'red-ui':     '#ff3939',   /* --alert on sika.com */
+          yellow:       '#ffc510',   /* --primary on sika.com */
+          'yellow-dark':'#e6ae00',
+          blue:         '#3982b1',   /* --secondary */
+          green:        '#52a398',   /* --success */
+          'dark-grey':  '#616161',
+          grey:         '#e0e0e0',
+          'light-grey': '#f5f5f5',
         },
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        /* Barlow = closest freely available substitute for Sika's Klavika */
+        sans: ['Barlow', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        condensed: ['Barlow Condensed', 'Barlow', 'sans-serif'],
       },
       boxShadow: {
         'card':    '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',

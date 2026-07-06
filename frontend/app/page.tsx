@@ -28,10 +28,10 @@ const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT'];
 
 const FEATURES = [
-  { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance' },
-  { icon: '🔐', title: 'SHA-256 Verified', desc: 'Every PDF has a cryptographic integrity hash' },
-  { icon: '📋', title: 'Version history', desc: 'Full audit trail — nothing ever deleted' },
-  { icon: '🌍', title: 'No login required', desc: 'Fully public access, no account needed' },
+  { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance', accent: '#ffc510' },
+  { icon: '🔐', title: 'SHA-256 Verified', desc: 'Every PDF has a cryptographic integrity hash', accent: '#3982b1' },
+  { icon: '📋', title: 'Version history', desc: 'Full audit trail — nothing ever deleted', accent: '#52a398' },
+  { icon: '🌍', title: 'No login required', desc: 'Fully public access, no account needed', accent: '#C8102E' },
 ];
 
 function SkeletonCard() {
@@ -102,8 +102,8 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="hidden sm:flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold border" style={{ background: '#fff9e6', color: '#7a5500', borderColor: '#ffc510' }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#ffc510' }} />
               EU CPR Compliant
             </span>
             <a href="/admin" className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1.5 border border-gray-200 rounded-lg font-medium hover:border-gray-400 transition-all duration-200">
@@ -123,7 +123,7 @@ export default function HomePage() {
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white/70 text-xs px-3 py-1.5 rounded-full mb-6 animate-fade-in">
-            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#ffc510' }} />
             Public repository · No login required
           </div>
 
@@ -289,9 +289,11 @@ export default function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger mt-6">
             {FEATURES.map(f => (
               <div key={f.title}
-                className="card-hover bg-white border border-gray-100 rounded-xl p-5 text-center shadow-card">
-                <div className="text-3xl mb-3">{f.icon}</div>
-                <h3 className="text-xs font-semibold text-gray-800 mb-1">{f.title}</h3>
+                className="card-hover bg-white border border-gray-100 rounded-xl p-5 text-center shadow-card overflow-hidden relative">
+                {/* Sika color accent bar at top */}
+                <div className="absolute top-0 inset-x-0 h-1" style={{ background: f.accent }} />
+                <div className="text-3xl mb-3 mt-1">{f.icon}</div>
+                <h3 className="text-xs font-semibold text-gray-800 mb-1 font-condensed">{f.title}</h3>
                 <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
               </div>
             ))}

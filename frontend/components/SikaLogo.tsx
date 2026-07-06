@@ -5,45 +5,62 @@ interface Props {
 }
 
 export function SikaLogo({ width = 72, className = '', showGroup = false }: Props) {
-  const h = Math.round(width * (showGroup ? 0.5 : 0.4));
+  const h  = Math.round(width * 0.40);
+  const fs = Math.round(h * 0.65);
+  const px = Math.round(h * 0.38);
+  const py = Math.round(h * 0.18);
+
   return (
-    <svg
-      width={width}
-      height={h}
-      viewBox={showGroup ? '0 0 90 45' : '0 0 90 36'}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-label="Sika"
+    <div
+      className={`inline-flex flex-col items-center ${className}`}
       role="img"
+      aria-label="Sika"
     >
-      <rect width="90" height="36" fill="#C8102E" />
-      <text
-        x="45"
-        y="26.5"
-        textAnchor="middle"
-        fill="white"
-        fontFamily="'Arial Black', 'Franklin Gothic Heavy', Arial, sans-serif"
-        fontWeight="900"
-        fontSize="22"
-        letterSpacing="3"
+      {/* Red wordmark box */}
+      <div
+        style={{
+          background: '#C8102E',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingLeft: px,
+          paddingRight: px,
+          paddingTop: py,
+          paddingBottom: py,
+          lineHeight: 1,
+        }}
       >
-        Sika
-      </text>
+        <span
+          style={{
+            fontFamily: '"Barlow", "Arial Black", Arial, sans-serif',
+            fontWeight: 900,
+            fontSize: fs,
+            color: '#ffffff',
+            letterSpacing: Math.round(fs * 0.08),
+            lineHeight: 1,
+            display: 'block',
+          }}
+        >
+          Sika
+        </span>
+      </div>
+
+      {/* Optional GROUP label below */}
       {showGroup && (
-        <text
-          x="45"
-          y="42"
-          textAnchor="middle"
-          fill="#C8102E"
-          fontFamily="Arial, Helvetica, sans-serif"
-          fontWeight="400"
-          fontSize="9"
-          letterSpacing="3"
+        <span
+          style={{
+            fontFamily: '"Barlow", Arial, sans-serif',
+            fontWeight: 500,
+            fontSize: Math.round(fs * 0.40),
+            color: '#616161',
+            letterSpacing: Math.round(fs * 0.30),
+            paddingLeft: Math.round(fs * 0.30),
+            marginTop: 3,
+          }}
         >
           GROUP
-        </text>
+        </span>
       )}
-    </svg>
+    </div>
   );
 }
