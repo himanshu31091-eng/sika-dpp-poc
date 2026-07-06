@@ -207,14 +207,27 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 
-      {/* ── Header ── */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 shadow-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+      {/* ── Header — Sika yellow diagonal ── */}
+      <header className="sticky top-0 z-40 overflow-hidden shadow-sm dark:shadow-none">
+        {/* Yellow diagonal header — same pattern as sika.com */}
+        <div className="absolute inset-0" style={{ background: dark ? '#1a1a1a' : '#ffc510' }} />
+        <div
+          className="hidden sm:block absolute inset-y-0 right-0"
+          style={{
+            background: dark ? '#111111' : '#e8e8e8',
+            left: '48%',
+            clipPath: 'polygon(46px 0, 100% 0, 100% 100%, 0 100%)',
+          }}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <SikaLogo size={40} className="shrink-0" />
-            <div className="hidden sm:block border-l border-gray-200 dark:border-gray-700 pl-3 min-w-0">
-              <h1 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">Admin Panel</h1>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Document management</p>
+            <div className="hidden sm:block pl-2 min-w-0">
+              <h1
+                className="text-sm font-bold leading-tight uppercase tracking-wider"
+                style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif', color: dark ? '#ffffff' : '#1a1a1a', letterSpacing: '0.08em' }}
+              >Admin Panel</h1>
+              <p className="text-xs" style={{ color: dark ? '#9ca3af' : '#4a4a4a' }}>Document management</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

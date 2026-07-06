@@ -28,10 +28,10 @@ const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT'];
 
 const FEATURES = [
-  { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance', accent: '#ffc510' },
-  { icon: '🔐', title: 'SHA-256 Verified', desc: 'Every PDF has a cryptographic integrity hash', accent: '#3982b1' },
-  { icon: '📋', title: 'Version history', desc: 'Full audit trail — nothing ever deleted', accent: '#52a398' },
-  { icon: '🌍', title: 'No login required', desc: 'Fully public access, no account needed', accent: '#C8102E' },
+  { icon: '🔗', title: 'Stable URLs', desc: '10+ year URL persistence for EU CPR compliance', bg: '#52a398', text: 'white' },
+  { icon: '🔐', title: 'SHA-256 Verified', desc: 'Every PDF has a cryptographic integrity hash', bg: '#3982b1', text: 'white' },
+  { icon: '📋', title: 'Version history', desc: 'Full audit trail — nothing ever deleted', bg: '#52a398', text: 'white' },
+  { icon: '🌍', title: 'No login required', desc: 'Fully public access, no account needed', bg: '#3982b1', text: 'white' },
 ];
 
 function SkeletonCard() {
@@ -91,45 +91,83 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50">
 
-      {/* ── Header ── */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-card">
-        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+      {/* ── Header — Sika yellow diagonal (matches sika.com layout) ── */}
+      <header className="sticky top-0 z-50 overflow-hidden shadow-sm" style={{ background: '#ffc510' }}>
+        {/* Gray right panel with diagonal left edge — desktop only */}
+        <div
+          className="hidden sm:block absolute inset-y-0 right-0 pointer-events-none"
+          style={{
+            background: '#f0f0f0',
+            left: '54%',
+            clipPath: 'polygon(46px 0, 100% 0, 100% 100%, 0 100%)',
+          }}
+        />
+        <div className="relative z-10 max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+          {/* Logo + title on yellow section */}
           <div className="flex items-center gap-3">
-            <SikaLogo size={44} />
-            <div className="hidden sm:block border-l border-gray-200 pl-3">
-              <h1 className="text-sm font-semibold text-gray-900 leading-tight">Document Repository</h1>
-              <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>
+            <SikaLogo size={48} />
+            <div className="hidden sm:block">
+              <h1
+                className="text-sm font-bold text-gray-900 leading-tight tracking-wider uppercase"
+                style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif', letterSpacing: '0.08em' }}
+              >
+                Document Repository
+              </h1>
+              <p className="text-xs text-gray-700" style={{ fontFamily: '"Barlow", sans-serif' }}>
+                Digital Product Passports &amp; Technical Documentation
+              </p>
             </div>
           </div>
+          {/* Nav on right (gray on desktop, yellow on mobile) */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold border" style={{ background: '#fff9e6', color: '#7a5500', borderColor: '#ffc510' }}>
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#ffc510' }} />
+            <span className="hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded font-semibold"
+              style={{ background: 'rgba(255,255,255,0.85)', color: '#1a1a1a', border: '1px solid rgba(0,0,0,0.1)' }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#52a398' }} />
               EU CPR Compliant
             </span>
-            <a href="/admin" className="text-xs text-gray-500 hover:text-gray-900 px-3 py-1.5 border border-gray-200 rounded-lg font-medium hover:border-gray-400 transition-all duration-200">
+            <a href="/how-it-works"
+              className="hidden sm:block text-xs text-gray-600 hover:text-gray-900 px-3 py-1.5 font-medium transition-colors duration-200"
+              style={{ fontFamily: '"Barlow", sans-serif' }}>
+              How It Works
+            </a>
+            <a href="/admin"
+              className="text-xs font-semibold px-3 py-1.5 transition-all duration-200 rounded"
+              style={{ background: '#C8102E', color: 'white', fontFamily: '"Barlow", sans-serif' }}>
               Admin →
             </a>
           </div>
         </div>
       </header>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-[#0f172a]">
-        {/* grid pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.06]"
+      {/* ── Hero — Sika yellow/red brand strip + search ── */}
+      <section className="relative overflow-hidden" style={{ background: '#1a1a1a' }}>
+        {/* Sika yellow accent bar at very top */}
+        <div className="absolute top-0 inset-x-0 h-1" style={{ background: '#ffc510' }} />
+        {/* Subtle grid */}
+        <div className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-        {/* red glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-sika-red rounded-full opacity-[0.08] blur-[80px]" />
+        {/* Yellow glow behind search area */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full opacity-[0.06] blur-[60px]"
+          style={{ background: '#ffc510' }} />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white/70 text-xs px-3 py-1.5 rounded-full mb-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 border text-xs px-3 py-1.5 rounded mb-6 animate-fade-in"
+            style={{ background: 'rgba(255,197,16,0.12)', borderColor: 'rgba(255,197,16,0.3)', color: 'rgba(255,197,16,0.9)' }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#ffc510' }} />
             Public repository · No login required
           </div>
 
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight animate-slide-up">
-            Sika product<br />
-            <span className="gradient-text">documentation</span>
+          <h2
+            className="text-4xl sm:text-5xl font-bold text-white mb-3 leading-tight animate-slide-up uppercase tracking-tight"
+            style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif' }}
+          >
+            Sika Product
+          </h2>
+          <h2
+            className="text-4xl sm:text-5xl font-bold mb-5 leading-tight animate-slide-up uppercase tracking-tight"
+            style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif', color: '#ffc510', animationDelay: '40ms' }}
+          >
+            Documentation
           </h2>
           <p className="text-white/50 text-sm sm:text-base mb-10 max-w-md mx-auto animate-slide-up" style={{ animationDelay: '80ms' }}>
             Safety data sheets, declarations of performance, technical guides —
@@ -138,7 +176,7 @@ export default function HomePage() {
 
           {/* Search bar */}
           <div className="max-w-xl mx-auto animate-slide-up" style={{ animationDelay: '140ms' }}>
-            <div className={`flex gap-0 bg-white rounded-xl overflow-hidden transition-all duration-300 ${focused ? 'shadow-[0_0_0_3px_rgba(204,0,0,0.35),0_8px_32px_rgba(0,0,0,0.3)]' : 'shadow-[0_4px_24px_rgba(0,0,0,0.25)]'}`}>
+            <div className={`flex gap-0 bg-white overflow-hidden transition-all duration-300 ${focused ? 'shadow-[0_0_0_3px_rgba(255,197,16,0.5),0_8px_32px_rgba(0,0,0,0.3)]' : 'shadow-[0_4px_24px_rgba(0,0,0,0.3)]'}`}>
               <input
                 type="text"
                 value={query}
@@ -148,11 +186,13 @@ export default function HomePage() {
                 onBlur={() => setFocused(false)}
                 placeholder="Search by product name or code…"
                 className="flex-1 px-5 py-4 text-sm text-gray-800 placeholder-gray-400 outline-none bg-transparent font-medium"
+                style={{ fontFamily: '"Barlow", sans-serif' }}
               />
               <button
                 onClick={() => doSearch(query)}
                 disabled={loading}
-                className="btn-press bg-sika-red hover:bg-sika-red-dark text-white px-7 py-4 text-sm font-semibold transition-colors duration-200 disabled:opacity-60 flex items-center gap-2 shrink-0">
+                className="btn-press text-white px-7 py-4 text-sm font-bold transition-colors duration-200 disabled:opacity-60 flex items-center gap-2 shrink-0 uppercase tracking-wide"
+                style={{ background: '#C8102E', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.06em' }}>
                 {loading
                   ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   : <span>Search</span>
@@ -286,18 +326,30 @@ export default function HomePage() {
 
         {/* ── Feature tiles ── */}
         {!searched && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger mt-6">
-            {FEATURES.map(f => (
-              <div key={f.title}
-                className="card-hover bg-white border border-gray-100 rounded-xl p-5 text-center shadow-card overflow-hidden relative">
-                {/* Sika color accent bar at top */}
-                <div className="absolute top-0 inset-x-0 h-1" style={{ background: f.accent }} />
-                <div className="text-3xl mb-3 mt-1">{f.icon}</div>
-                <h3 className="text-xs font-semibold text-gray-800 mb-1 font-condensed">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Section label */}
+            <p className="text-xs font-bold uppercase tracking-widest mt-6 mb-3"
+              style={{ fontFamily: '"Barlow Condensed", sans-serif', color: '#616161', letterSpacing: '0.12em' }}>
+              Why Sika Document Repository
+            </p>
+            {/* Teal/blue feature cards — matches sika.com card style */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-slide-up stagger">
+              {FEATURES.map(f => (
+                <div key={f.title}
+                  className="card-hover rounded-xl p-5 shadow-card-md"
+                  style={{ background: f.bg }}>
+                  <div className="text-3xl mb-3">{f.icon}</div>
+                  <h3
+                    className="text-xs font-bold mb-1.5 uppercase tracking-wide"
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', color: 'rgba(255,255,255,0.95)', letterSpacing: '0.06em' }}
+                  >
+                    {f.title}
+                  </h3>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </main>

@@ -21,7 +21,6 @@ export default function LoginPage() {
     setError('');
     const username = userRef.current?.value?.trim().toLowerCase() || '';
     const password = passRef.current?.value || '';
-
     setTimeout(() => {
       if (USERS[username] && USERS[username] === password) {
         localStorage.setItem('admin_user', username);
@@ -35,76 +34,125 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      {/* Sika red top bar */}
-      <div className="fixed top-0 inset-x-0 h-1 bg-sika-red" />
+    <main className="min-h-screen flex flex-col" style={{ background: '#f5f5f5' }}>
 
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-3">
-            <SikaLogo size={80} showGroup />
-          </div>
-          <p className="text-sm text-gray-500 mt-2 font-medium">Document Repository</p>
-          <p className="text-xs text-gray-400 mt-0.5">Admin Portal</p>
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-          {/* Red accent header strip */}
-          <div className="bg-sika-red px-6 py-4">
-            <h2 className="text-sm font-semibold text-white">Administrator Sign In</h2>
-            <p className="text-xs text-white/70 mt-0.5">Access restricted to authorised Sika personnel</p>
-          </div>
-
-          <div className="p-6">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Username</label>
-                <input
-                  ref={userRef}
-                  type="text"
-                  autoComplete="username"
-                  placeholder="Enter username"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-sika-red focus:border-sika-red focus:outline-none transition-shadow"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Password</label>
-                <input
-                  ref={passRef}
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Enter password"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-sika-red focus:border-sika-red focus:outline-none transition-shadow"
-                />
-              </div>
-              {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg flex items-center gap-1.5">
-                  <span>⚠</span> {error}
-                </p>
-              )}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-press w-full bg-sika-red hover:bg-sika-red-dark text-white py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 transition-colors duration-200"
+      {/* ── Sika yellow diagonal header ── */}
+      <header className="relative overflow-hidden" style={{ background: '#ffc510', minHeight: 72 }}>
+        {/* Gray right panel */}
+        <div
+          className="hidden sm:block absolute inset-y-0 right-0"
+          style={{ background: '#e8e8e8', left: '52%', clipPath: 'polygon(46px 0, 100% 0, 100% 100%, 0 100%)' }}
+        />
+        <div className="relative z-10 max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SikaLogo size={48} />
+            <div className="hidden sm:block">
+              <h1
+                className="text-sm font-bold text-gray-900 uppercase"
+                style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif', letterSpacing: '0.08em' }}
               >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Signing in…
-                  </span>
-                ) : 'Sign in'}
-              </button>
-            </form>
+                Document Repository
+              </h1>
+              <p className="text-xs text-gray-700">Admin Portal</p>
+            </div>
           </div>
+          <a href="/"
+            className="text-xs font-medium px-3 py-1.5 rounded transition-colors"
+            style={{ background: 'rgba(255,255,255,0.7)', color: '#1a1a1a' }}>
+            ← Public Site
+          </a>
         </div>
+      </header>
 
-        <p className="text-center text-xs text-gray-300 mt-6">
-          Sika Document Repository · Admin Access · POC v2.0
-        </p>
-        <p className="text-center text-xs text-gray-300 mt-1">
-          <a href="/" className="hover:text-gray-400 transition-colors">← View public repository</a>
-        </p>
+      {/* ── Login form centred in remaining space ── */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm">
+
+          {/* Sika logo + Group */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-3">
+              <SikaLogo size={80} showGroup />
+            </div>
+            <p className="text-xs mt-3" style={{ color: '#616161', fontFamily: '"Barlow", sans-serif' }}>
+              Restricted to authorised Sika personnel
+            </p>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white shadow-card-md overflow-hidden" style={{ borderRadius: 2 }}>
+            {/* Yellow top stripe matching header */}
+            <div style={{ height: 4, background: '#ffc510' }} />
+
+            <div className="px-6 py-6">
+              <h2
+                className="text-base font-bold uppercase mb-5"
+                style={{ fontFamily: '"Barlow Condensed", Barlow, sans-serif', letterSpacing: '0.08em', color: '#1a1a1a' }}
+              >
+                Sign In
+              </h2>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', color: '#616161', letterSpacing: '0.08em' }}
+                  >
+                    Username
+                  </label>
+                  <input
+                    ref={userRef}
+                    type="text"
+                    autoComplete="username"
+                    placeholder="Enter username"
+                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none transition-shadow"
+                    style={{ borderRadius: 2, fontFamily: '"Barlow", sans-serif' }}
+                    onFocus={e => { e.target.style.borderColor = '#ffc510'; e.target.style.boxShadow = '0 0 0 3px rgba(255,197,16,0.2)'; }}
+                    onBlur={e => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wider mb-1.5"
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', color: '#616161', letterSpacing: '0.08em' }}
+                  >
+                    Password
+                  </label>
+                  <input
+                    ref={passRef}
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Enter password"
+                    className="w-full border border-gray-300 px-3 py-2.5 text-sm focus:outline-none transition-shadow"
+                    style={{ borderRadius: 2, fontFamily: '"Barlow", sans-serif' }}
+                    onFocus={e => { e.target.style.borderColor = '#ffc510'; e.target.style.boxShadow = '0 0 0 3px rgba(255,197,16,0.2)'; }}
+                    onBlur={e => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none'; }}
+                  />
+                </div>
+                {error && (
+                  <p className="text-xs bg-red-50 border border-red-100 px-3 py-2 flex items-center gap-1.5" style={{ color: '#C8102E', borderRadius: 2 }}>
+                    <span>⚠</span> {error}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-press w-full text-white py-2.5 text-sm font-bold disabled:opacity-50 transition-colors duration-200 uppercase tracking-wider"
+                  style={{ background: '#C8102E', borderRadius: 2, fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.08em' }}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Signing in…
+                    </span>
+                  ) : 'Sign In'}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <p className="text-center text-xs mt-6" style={{ color: '#b0b0b0' }}>
+            Sika Document Repository · POC v2.0 · Admin Access
+          </p>
+        </div>
       </div>
     </main>
   );
