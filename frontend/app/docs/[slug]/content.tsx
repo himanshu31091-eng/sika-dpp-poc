@@ -2,6 +2,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { publicApi } from '@/lib/api';
+import { SikaLogo } from '@/components/SikaLogo';
 
 interface VersionMeta {
   versionNumber: string;
@@ -153,6 +154,7 @@ function DocContent() {
                 className="text-gray-400 hover:text-gray-700 text-sm shrink-0 w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-all duration-200">
                 ←
               </button>
+              <SikaLogo width={44} className="shrink-0" />
               <div className="w-px h-4 bg-gray-200 shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">

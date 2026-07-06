@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/api';
+import { SikaLogo } from '@/components/SikaLogo';
 
 const DOC_TYPES = ['DoPC', 'SDS', 'TDS', 'Label', 'Technical', 'Other'];
 const LANGUAGES = ['EN', 'DE', 'FR', 'IT', 'ES', 'NL', 'PL', 'PT', 'Other'];
@@ -210,10 +211,8 @@ export default function AdminPage() {
       <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 shadow-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 bg-sika-red rounded-lg flex items-center justify-center shadow-red-sm shrink-0">
-              <span className="text-white text-sm font-bold leading-none">S</span>
-            </div>
-            <div className="min-w-0">
+            <SikaLogo width={56} className="shrink-0" />
+            <div className="hidden sm:block border-l border-gray-200 dark:border-gray-700 pl-3 min-w-0">
               <h1 className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">Admin Panel</h1>
               <p className="text-xs text-gray-400 dark:text-gray-500">Document management</p>
             </div>

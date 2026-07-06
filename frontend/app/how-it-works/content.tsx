@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 const sections = [
   {
     id: 'overview', icon: '1', color: 'blue', title: 'System Overview',
-    content: 'The MoreYeahs Document Repository satisfies EU CPR requirements for public document access. It provides clean separation between the internal EDMS (Optimal Systems / yuuvis-rad) and the public-facing document delivery layer.',
+    content: 'The Sika Document Repository satisfies EU CPR requirements for public document access. It provides clean separation between the internal EDMS (Optimal Systems / yuuvis-rad) and the public-facing document delivery layer.',
     items: [
       'Admin-only document upload with API key protection',
       'Public access with zero login or registration required',
@@ -198,7 +198,7 @@ export default function HowItWorksContent() {
             <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white text-xl font-bold">S</span>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">MoreYeahs Document Repository</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sika Document Repository</h2>
             <p className="text-gray-500 text-sm max-w-xl mx-auto mb-4">
               Complete technical reference - architecture, features, API, URL design, security and production checklist.
             </p>
@@ -247,7 +247,7 @@ export default function HowItWorksContent() {
             })}
           </div>
           <div className="mt-8 text-center text-xs text-gray-400 pb-8 no-print">
-            MoreYeahs Document Repository - POC v1.0 - Built for EU CPR Compliance
+            Sika Document Repository - POC v1.0 - Built for EU CPR Compliance
           </div>
         </div>
       </main>

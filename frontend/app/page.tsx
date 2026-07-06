@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { publicApi } from '@/lib/api';
+import { SikaLogo } from '@/components/SikaLogo';
 
 interface DocResult {
   slug: string;
@@ -92,13 +93,11 @@ export default function HomePage() {
 
       {/* ── Header ── */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-card">
-        <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-sika-red rounded-lg flex items-center justify-center shadow-red-sm">
-              <span className="text-white text-sm font-bold leading-none">S</span>
-            </div>
-            <div>
-              <h1 className="text-sm font-semibold text-gray-900 leading-tight">MoreYeahs Document Repository</h1>
+            <SikaLogo width={64} />
+            <div className="hidden sm:block border-l border-gray-200 pl-3">
+              <h1 className="text-sm font-semibold text-gray-900 leading-tight">Document Repository</h1>
               <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>
             </div>
           </div>
@@ -129,7 +128,7 @@ export default function HomePage() {
           </div>
 
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight animate-slide-up">
-            Find product<br />
+            Sika product<br />
             <span className="gradient-text">documentation</span>
           </h2>
           <p className="text-white/50 text-sm sm:text-base mb-10 max-w-md mx-auto animate-slide-up" style={{ animationDelay: '80ms' }}>
