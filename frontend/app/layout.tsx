@@ -23,12 +23,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="bg-gray-50 text-gray-900 antialiased">
         {children}
-        <footer className="border-t-2 bg-white mt-16" style={{ borderColor: '#C8102E' }}>
-          {/* Sika yellow accent strip */}
-          <div className="h-1" style={{ background: '#ffc510' }} />
+        <footer className="bg-white mt-16">
+          {/* Sika yellow top strip — matches sika.com --primary */}
+          <div className="h-1.5" style={{ background: '#ffc510' }} />
           <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <SikaLogo width={52} />
+              <SikaLogo size={44} />
               <div>
                 <p className="text-xs font-semibold text-gray-700 leading-tight">Document Repository</p>
                 <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>

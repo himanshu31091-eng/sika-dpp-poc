@@ -95,7 +95,7 @@ export default function HomePage() {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-card">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <SikaLogo width={64} />
+            <SikaLogo size={44} />
             <div className="hidden sm:block border-l border-gray-200 pl-3">
               <h1 className="text-sm font-semibold text-gray-900 leading-tight">Document Repository</h1>
               <p className="text-xs text-gray-400">Digital Product Passports &amp; Technical Documentation</p>

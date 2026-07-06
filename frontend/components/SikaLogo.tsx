@@ -1,60 +1,68 @@
 interface Props {
-  width?: number;
+  size?: number;
   className?: string;
   showGroup?: boolean;
 }
 
-export function SikaLogo({ width = 72, className = '', showGroup = false }: Props) {
-  const h  = Math.round(width * 0.40);
-  const fs = Math.round(h * 0.65);
-  const px = Math.round(h * 0.38);
-  const py = Math.round(h * 0.18);
-
+export function SikaLogo({ size = 44, className = '', showGroup = false }: Props) {
   return (
     <div
       className={`inline-flex flex-col items-center ${className}`}
       role="img"
       aria-label="Sika"
     >
-      {/* Red wordmark box */}
-      <div
-        style={{
-          background: '#C8102E',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingLeft: px,
-          paddingRight: px,
-          paddingTop: py,
-          paddingBottom: py,
-          lineHeight: 1,
-        }}
+      {/* Yellow square → red triangle → Sika italic text inside */}
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 120 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <span
-          style={{
-            fontFamily: '"Barlow", "Arial Black", Arial, sans-serif',
-            fontWeight: 900,
-            fontSize: fs,
-            color: '#ffffff',
-            letterSpacing: Math.round(fs * 0.08),
-            lineHeight: 1,
-            display: 'block',
-          }}
+        {/* Sika yellow background */}
+        <rect width="120" height="120" fill="#ffc510" />
+
+        {/* Sika red triangle (pointing up) */}
+        <polygon points="60,11 113,105 7,105" fill="#C8102E" />
+
+        {/* "Sika" wordmark — bold italic serif, white, inside triangle */}
+        <text
+          x="60"
+          y="81"
+          textAnchor="middle"
+          fill="white"
+          fontFamily="Georgia, 'Palatino Linotype', 'Book Antiqua', Palatino, serif"
+          fontStyle="italic"
+          fontWeight="bold"
+          fontSize="29"
+          letterSpacing="1"
         >
           Sika
-        </span>
-      </div>
+        </text>
 
-      {/* Optional GROUP label below */}
+        {/* Registered trademark ® */}
+        <text
+          x="88"
+          y="38"
+          fill="white"
+          fontFamily="Arial, Helvetica, sans-serif"
+          fontSize="10"
+          fontWeight="normal"
+        >
+          ®
+        </text>
+      </svg>
+
+      {/* Optional "GROUP" label below */}
       {showGroup && (
         <span
           style={{
             fontFamily: '"Barlow", Arial, sans-serif',
             fontWeight: 500,
-            fontSize: Math.round(fs * 0.40),
+            fontSize: Math.round(size * 0.19),
             color: '#616161',
-            letterSpacing: Math.round(fs * 0.30),
-            paddingLeft: Math.round(fs * 0.30),
+            letterSpacing: Math.round(size * 0.06),
+            paddingLeft: Math.round(size * 0.06),
             marginTop: 3,
           }}
         >

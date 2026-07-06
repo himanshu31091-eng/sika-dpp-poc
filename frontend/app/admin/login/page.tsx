@@ -43,7 +43,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
-            <SikaLogo width={88} showGroup />
+            <SikaLogo size={80} showGroup />
           </div>
           <p className="text-sm text-gray-500 mt-2 font-medium">Document Repository</p>
           <p className="text-xs text-gray-400 mt-0.5">Admin Portal</p>
